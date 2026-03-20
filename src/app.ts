@@ -4,6 +4,8 @@ import helmet from 'helmet';
 import { prisma } from './config/prisma.config';
 import authRoutes from './routes/auth.route';
 import userRoutes from './routes/user.route';
+import enterpriseRoutes from './routes/enterprise.route';
+import branchRoutes from './routes/branch.route';
 
 const app = express();
 
@@ -14,6 +16,8 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/enterprises", enterpriseRoutes);
+app.use("/api/branches", branchRoutes);
 
 // Test Route
 app.get('/', async (req, res) => {
