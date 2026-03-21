@@ -29,6 +29,7 @@ export class BranchService {
     name: string;
     maxCapacity: number;
     address: string;
+    cameraUrl?: string;
   }) {
     const enterprise = await this.enterpriseRepository.findById(data.enterpriseId);
     if (!enterprise) {
