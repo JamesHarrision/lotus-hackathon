@@ -8,6 +8,19 @@ export class RoutingRepository {
     });
   }
 
+  async create(data: {
+    userId: number;
+    fromBranchId: number;
+    toBranchId: number;
+    status: RoutingStatus;
+    incentiveGiven?: string;
+    calculatedCost?: number;
+  }): Promise<RoutingHistory> {
+    return prisma.routingHistory.create({
+      data,
+    });
+  }
+
   async updateStatus(id: number, status: RoutingStatus): Promise<RoutingHistory> {
     return prisma.routingHistory.update({
       where: { id },

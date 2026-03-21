@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { AuroraBackground } from "@/components/ui/aurora-background";
-import { ArrowLeft, Plus, Trash2, Building2, Check, X } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Building2, Check, X, Camera, MapPin, ChevronRight, ChevronLeft, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Branch {
   id: string;
+  name: string;
   location: string;
   capacity: string;
   rtspLinks: string[];
@@ -18,19 +20,21 @@ interface EnterpriseRegistrationProps {
   onBack: () => void;
 }
 
-const createBranch = (): Branch => ({
+const createBranch = (index: number): Branch => ({
   id: crypto.randomUUID(),
+  name: `Branch #${index + 1}`,
   location: "",
-  capacity: "",
+  capacity: "50",
   rtspLinks: [""],
 });
 
 const EnterpriseRegistration = ({ onBack }: EnterpriseRegistrationProps) => {
+  const [step, setStep] = useState(1);
   const [companyName, setCompanyName] = useState("");
-  const [branches, setBranches] = useState<Branch[]>([createBranch()]);
+  const [branches, setBranches] = useState<Branch[]>([createBranch(0)]);
   const [submitted, setSubmitted] = useState(false);
 
-  const updateBranch = (id: string, field: "location" | "capacity", value: string) => {
+  const updateBranch = (id: string, field: keyof Branch, value: any) => {
     setBranches((prev) =>
       prev.map((b) => (b.id === id ? { ...b, [field]: value } : b))
     );
@@ -65,7 +69,7 @@ const EnterpriseRegistration = ({ onBack }: EnterpriseRegistrationProps) => {
   };
 
   const addBranch = () => {
-    setBranches((prev) => [...prev, createBranch()]);
+    setBranches((prev) => [...prev, createBranch(prev.length)]);
   };
 
   const removeBranch = (id: string) => {
@@ -73,207 +77,288 @@ const EnterpriseRegistration = ({ onBack }: EnterpriseRegistrationProps) => {
     setBranches((prev) => prev.filter((b) => b.id !== id));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!companyName.trim()) {
+  const handleNext = () => {
+    if (step === 1 && !companyName.trim()) {
       toast.error("Please enter your company name.");
       return;
     }
+    setStep(step + 1);
+  };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     const incomplete = branches.some(
-      (b) => !b.location.trim() || !b.capacity.trim() || (b.rtspLinks || [""]).some((l) => !l.trim())
+      (b) => !b.location.trim() || !b.capacity.trim()
     );
     if (incomplete) {
       toast.error("Please fill out all branch details.");
       return;
     }
-
     setSubmitted(true);
-    toast.success("Enterprise registered successfully!");
+    toast.success("Enterprise platform initialized!");
   };
 
   if (submitted) {
     return (
       <AuroraBackground className="min-h-screen h-auto">
-        <div className="relative z-10 flex flex-col items-center justify-center px-4">
-          <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-6">
-            <Check className="w-8 h-8 text-accent" />
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="relative z-10 flex flex-col items-center justify-center px-4"
+        >
+          <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center mb-8 relative">
+            <motion.div
+              animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="absolute inset-0 bg-accent rounded-full"
+            />
+            <Check className="w-10 h-10 text-accent relative z-10" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Registration Complete</h2>
-          <p className="text-muted-foreground text-center max-w-sm mb-8">
-            <span className="font-medium text-foreground">{companyName}</span> has been registered
-            with {branches.length} branch{branches.length > 1 ? "es" : ""}. The system will begin
-            monitoring capacity via your CCTV feeds.
+          <h2 className="text-4xl font-black text-foreground mb-4 tracking-tighter">System Initialized</h2>
+          <p className="text-muted-foreground text-center max-w-sm mb-12 text-lg">
+            <span className="text-foreground font-bold">{companyName}</span> is now live with <span className="text-accent font-bold">{branches.length}</span> nodes under intelligence monitoring.
           </p>
-          <Button variant="outline" onClick={onBack}>
-            Back to Home
+          <Button
+            className="bg-accent hover:bg-accent/90 text-white rounded-full px-10 py-6 text-lg font-bold shadow-xl"
+            onClick={onBack}
+          >
+            Go to Management Console
           </Button>
-        </div>
+        </motion.div>
       </AuroraBackground>
     );
   }
 
   return (
-    <AuroraBackground className="min-h-screen h-auto items-start">
+    <AuroraBackground className="min-h-screen h-auto items-start bg-background">
       <div className="relative z-10 min-h-screen flex flex-col w-full">
-      {/* Header */}
-      <header className="border-b bg-card px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
-        <Button variant="ghost" size="icon" onClick={onBack}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-lg font-semibold text-foreground">Enterprise Registration</h1>
-          <p className="text-xs text-muted-foreground">Register your company and branches</p>
-        </div>
-        <ThemeToggle />
-      </header>
-
-      <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-4 py-8 space-y-8">
-          {/* Company Info */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-9 h-9 rounded-lg bg-accent/10 flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-accent" />
-              </div>
-              <div>
-                <h2 className="font-semibold text-foreground">Company Information</h2>
-                <p className="text-xs text-muted-foreground">Basic details about your enterprise</p>
-              </div>
+        {/* Glass Header */}
+        <header className="border-b border-white/5 bg-background/40 backdrop-blur-xl px-6 py-4 flex items-center gap-4 sticky top-0 z-50">
+          <Button variant="ghost" size="icon" onClick={step > 1 ? () => setStep(step - 1) : onBack} className="rounded-full">
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div className="flex-1">
+            <h1 className="text-xl font-black tracking-tight flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-accent" />
+              Enterprise Setup
+            </h1>
+            <div className="flex gap-1 mt-1">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className={`h-1 w-8 rounded-full transition-all duration-500 ${step >= i ? 'bg-accent' : 'bg-white/10'}`} />
+              ))}
             </div>
+          </div>
+          <ThemeToggle />
+        </header>
 
-            <div className="space-y-2">
-              <Label htmlFor="companyName">Company Name</Label>
-              <Input
-                id="companyName"
-                placeholder="e.g. Acme Corporation"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-              />
-            </div>
+        <main className="flex-1 flex flex-col items-center py-12 px-6">
+          <div className="w-full max-w-2xl">
+            <AnimatePresence mode="wait">
+              {step === 1 && (
+                <motion.div
+                  key="step1"
+                  initial={{ x: 20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -20, opacity: 0 }}
+                  className="space-y-8"
+                >
+                  <div className="space-y-2">
+                    <h2 className="text-3xl font-black tracking-tighter">Your Identity</h2>
+                    <p className="text-muted-foreground text-lg">Define how your enterprise appears in the network.</p>
+                  </div>
 
-            <div className="space-y-2">
-              <Label>Total Branches</Label>
-              <div className="h-10 px-3 flex items-center rounded-md border bg-muted text-sm text-muted-foreground">
-                {branches.length} branch{branches.length > 1 ? "es" : ""}
-              </div>
-            </div>
-          </section>
+                  <div className="glass-panel p-8 rounded-3xl space-y-6">
+                    <div className="space-y-3">
+                      <Label htmlFor="companyName" className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Company Name</Label>
+                      <Input
+                        id="companyName"
+                        placeholder="Enter the name of your brand..."
+                        className="h-14 text-lg bg-white/5 border-white/10 rounded-2xl focus:ring-accent"
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                      />
+                    </div>
+                    <div className="p-4 bg-accent/5 border border-accent/10 rounded-2xl flex items-start gap-3">
+                      <Sparkles className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        This will be the primary identifier for your customers. You can later customize your brand colors and theme.
+                      </p>
+                    </div>
+                  </div>
 
-          {/* Branches */}
-          <section className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-foreground">Branch Details</h2>
-              <Button type="button" variant="outline" size="sm" onClick={addBranch}>
-                <Plus className="w-4 h-4 mr-1" />
-                Add Branch
-              </Button>
-            </div>
+                  <Button size="lg" className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 text-lg font-bold" onClick={handleNext}>
+                    Continue to Branch Setup
+                    <ChevronRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </motion.div>
+              )}
 
-            <div className="space-y-4">
-              {branches.map((branch, index) => (
-                <div
-                  key={branch.id}
-                  className="bg-card border rounded-xl p-5 space-y-4"
+              {step === 2 && (
+                <motion.div
+                  key="step2"
+                  initial={{ x: 20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -20, opacity: 0 }}
+                  className="space-y-8"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground">
-                      Branch {index + 1}
-                    </span>
-                    {branches.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => removeBranch(branch.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
+                    <div className="space-y-1">
+                      <h2 className="text-3xl font-black tracking-tighter">Network Nodes</h2>
+                      <p className="text-muted-foreground">Add your physical locations to the grid.</p>
+                    </div>
+                    <Button onClick={addBranch} variant="outline" className="rounded-full border-accent/30 text-accent hover:bg-accent/5">
+                      <Plus className="w-4 h-4 mr-2" /> Add Branch
+                    </Button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Location</Label>
-                      <Input
-                        placeholder="Address or coordinates"
-                        value={branch.location}
-                        onChange={(e) =>
-                          updateBranch(branch.id, "location", e.target.value)
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Capacity</Label>
-                      <Input
-                        type="number"
-                        min="1"
-                        placeholder="Max visitors"
-                        value={branch.capacity}
-                        onChange={(e) =>
-                          updateBranch(branch.id, "capacity", e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label>RTSP Camera Links</Label>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 text-xs text-accent"
-                        onClick={() => addRtspLink(branch.id)}
+                  <div className="space-y-6">
+                    {branches.map((branch, index) => (
+                      <motion.div
+                        layout
+                        key={branch.id}
+                        className="glass-panel p-6 rounded-3xl space-y-6 relative overflow-hidden group"
                       >
-                        <Plus className="w-3 h-3 mr-1" />
-                        Add Camera
-                      </Button>
-                    </div>
-                    <div className="space-y-2">
-                      {(branch.rtspLinks || [""]).map((link, linkIndex) => (
-                        <div key={linkIndex} className="flex gap-2">
-                          <Input
-                            placeholder={`rtsp://camera-feed-${linkIndex + 1}`}
-                            value={link}
-                            onChange={(e) =>
-                              updateRtspLink(branch.id, linkIndex, e.target.value)
-                            }
-                          />
-                          {(branch.rtspLinks || []).length > 1 && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="h-10 w-10 shrink-0 text-muted-foreground hover:text-destructive"
-                              onClick={() => removeRtspLink(branch.id, linkIndex)}
-                            >
-                              <X className="w-4 h-4" />
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent text-xs font-black">
+                              {index + 1}
+                            </div>
+                            <Input
+                              value={branch.name}
+                              onChange={(e) => updateBranch(branch.id, "name", e.target.value)}
+                              className="bg-transparent border-none text-xl font-bold focus-visible:ring-0 p-0 h-auto w-auto"
+                            />
+                          </div>
+                          {branches.length > 1 && (
+                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-red-500 rounded-full" onClick={() => removeBranch(branch.id)}>
+                              <Trash2 className="w-4 h-4" />
                             </Button>
                           )}
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Location</Label>
+                            <div className="relative">
+                              <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                              <Input
+                                placeholder="Address or coordinates"
+                                className="pl-10 bg-white/5 border-white/10 rounded-xl"
+                                value={branch.location}
+                                onChange={(e) => updateBranch(branch.id, "location", e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Max Capacity</Label>
+                            <div className="relative">
+                              <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                              <Input
+                                type="number"
+                                className="pl-10 bg-white/5 border-white/10 rounded-xl"
+                                value={branch.capacity}
+                                onChange={(e) => updateBranch(branch.id, "capacity", e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Camera Feeds (RTSP)</Label>
+                            <Button variant="ghost" size="sm" className="h-6 text-[10px] text-accent font-bold" onClick={() => addRtspLink(branch.id)}>
+                              + Add Feed
+                            </Button>
+                          </div>
+                          {branch.rtspLinks.map((link, lIndex) => (
+                            <div key={lIndex} className="flex gap-2">
+                              <div className="relative flex-1">
+                                <Camera className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <Input
+                                  placeholder="rtsp://your-camera-stream"
+                                  className="pl-10 bg-white/5 border-white/10 rounded-xl text-xs"
+                                  value={link}
+                                  onChange={(e) => updateRtspLink(branch.id, lIndex, e.target.value)}
+                                />
+                              </div>
+                              {branch.rtspLinks.length > 1 && (
+                                <Button variant="ghost" size="icon" className="rounded-xl h-10 w-10 text-muted-foreground hover:text-red-500" onClick={() => removeRtspLink(branch.id, lIndex)}>
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  <Button size="lg" className="w-full h-14 rounded-2xl bg-accent hover:bg-accent/90 text-lg font-bold" onClick={handleNext}>
+                    Review Network Map
+                    <ChevronRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </motion.div>
+              )}
+
+              {step === 3 && (
+                <motion.div
+                  key="step3"
+                  initial={{ x: 20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -20, opacity: 0 }}
+                  className="space-y-8"
+                >
+                  <div className="space-y-1">
+                    <h2 className="text-3xl font-black tracking-tighter">Final Review</h2>
+                    <p className="text-muted-foreground">Verify your enterprise deployment configuration.</p>
+                  </div>
+
+                  <div className="glass-panel p-8 rounded-3xl space-y-8">
+                    <div className="flex items-center gap-6">
+                      <div className="w-16 h-16 rounded-3xl bg-accent flex items-center justify-center text-white shadow-lg shadow-accent/20">
+                        <Building2 className="w-8 h-8" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-black">{companyName}</h3>
+                        <p className="text-accent font-bold tracking-widest uppercase text-xs">{branches.length} Registered Nodes</p>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-white/5 pt-6 space-y-4">
+                      {branches.map(b => (
+                        <div key={b.id} className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
+                          <div className="flex items-center gap-3">
+                            <MapPin className="w-4 h-4 text-accent" />
+                            <span className="font-bold text-sm tracking-tight">{b.name}</span>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Users className="w-3 h-3" /> {b.capacity}
+                            </span>
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Camera className="w-3 h-3" /> {b.rtspLinks.length}
+                            </span>
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
 
-        {/* Submit */}
-        <div className="sticky bottom-0 bg-card border-t px-4 py-4">
-          <div className="max-w-2xl mx-auto">
-            <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
-              Register Enterprise
-            </Button>
+                  <div className="flex gap-4">
+                    <Button variant="outline" size="lg" className="flex-1 h-14 rounded-2xl border-white/10 hover:bg-white/5" onClick={() => setStep(2)}>
+                      <ChevronLeft className="w-5 h-5 mr-2" /> Back
+                    </Button>
+                    <Button size="lg" className="flex-[2] h-14 rounded-2xl bg-accent hover:bg-accent/90 text-lg font-bold shadow-xl shadow-accent/20" onClick={handleSubmit}>
+                      Confirm & Initialize
+                      <Sparkles className="w-5 h-5 ml-2" />
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        </div>
-      </form>
-    </div>
+        </main>
+      </div>
     </AuroraBackground>
   );
 };

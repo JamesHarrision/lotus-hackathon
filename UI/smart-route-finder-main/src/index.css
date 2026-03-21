@@ -127,11 +127,9 @@
     width: 200%;
     height: 200%;
     transform: translate(-50%, -50%);
-    background: radial-gradient(
-      circle,
-      hsl(var(--brand) / 0.3),
-      transparent 50%
-    );
+    background: radial-gradient(circle,
+        hsl(var(--brand) / 0.3),
+        transparent 50%);
     opacity: 0;
     transition: opacity 0.3s ease;
   }

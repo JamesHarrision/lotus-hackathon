@@ -60,4 +60,35 @@ export class RoutingController {
       });
     }
   };
+
+  recommend = async (req: Request, res: Response) => {
+    try {
+      const { userId, enterpriseId, lat, lng } = req.body;
+
+      if (!userId || !enterpriseId || lat === undefined || lng === undefined) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Missing required fields: userId, enterpriseId, lat, lng" 
+        });
+      }
+
+      const recommendation = await this.routingService.recommendBranch(
+        userId, 
+        enterpriseId, 
+        lat, 
+        lng
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Branch recommendation generated successfully",
+        data: recommendation
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  };
 }
