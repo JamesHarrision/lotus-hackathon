@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { BranchService } from "../services/branch.service";
+import { getIO } from "../utils/socket.util";
 
 export class BranchController {
   private branchService: BranchService;
@@ -46,11 +47,22 @@ export class BranchController {
 
   create = async (req: Request, res: Response) => {
     try {
-      const { enterpriseId, name, maxCapacity, address } = req.body;
+      const { enterpriseId, name, maxCapacity, address, cameraUrl } = req.body;
       if (!enterpriseId || !name || !maxCapacity || !address) {
         return res.status(400).json({ success: false, message: "Missing required fields: enterpriseId, name, maxCapacity, address" });
       }
-      const branch = await this.branchService.createBranch({ enterpriseId, name, maxCapacity, address });
+      const branch = await this.branchService.createBranch({ enterpriseId, name, maxCapacity, address, cameraUrl });
+
+      // Phát sự kiện real-time cho AI Client (Python) nếu có cameraUrl
+      if (cameraUrl) {
+        getIO().emit('new_camera_added', {
+          enterpriseId: branch.enterpriseId,
+          branchId: branch.id,
+          cameraUrl: branch.cameraUrl
+        });
+        console.log(`[Socket] Emitted new_camera_added for branch ${branch.id}`);
+      }
+
       res.status(201).json({
         success: true,
         message: "Branch created successfully",
@@ -72,6 +84,17 @@ export class BranchController {
         return res.status(400).json({ success: false, message: "Invalid ID" });
       }
       const branch = await this.branchService.updateBranch(id, req.body);
+
+      // Phát sự kiện nếu có cameraUrl mới được thêm hoặc cập nhật
+      if (req.body.cameraUrl) {
+        getIO().emit('new_camera_added', {
+          enterpriseId: branch.enterpriseId,
+          branchId: branch.id,
+          cameraUrl: branch.cameraUrl
+        });
+        console.log(`[Socket] Emitted new_camera_added for updated branch ${branch.id}`);
+      }
+
       res.status(200).json({
         success: true,
         message: "Branch updated successfully",

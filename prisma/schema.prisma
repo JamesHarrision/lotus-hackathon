@@ -12,9 +12,9 @@ datasource db {
 
 // 1. Định nghĩa 3 Role chuẩn chỉ
 enum Role {
-  SUPERADMIN  // Quản trị viên hệ thống của bọn ông
-  ENTERPRISE  // Doanh nghiệp (VD: Highlands Coffee, Phê La)
-  USER        // Khách hàng đầu cuối
+  SUPERADMIN // Quản trị viên hệ thống của bọn ông
+  ENTERPRISE // Doanh nghiệp (VD: Highlands Coffee, Phê La)
+  USER // Khách hàng đầu cuối
 }
 
 // Trạng thái của lệnh điều hướng
@@ -27,73 +27,75 @@ enum RoutingStatus {
 
 // 2. Bảng User dùng chung cho cả 3 Role
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  role      Role     @default(USER)
-  name      String?
-  phone     String?
-  
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  password String
+  role     Role    @default(USER)
+  name     String?
+  phone    String?
+
   // Quan hệ
-  enterprise Enterprise?      // Chỉ có data nếu role là ENTERPRISE
+  enterprise Enterprise? // Chỉ có data nếu role là ENTERPRISE
   routings   RoutingHistory[] // Lịch sử điều hướng của khách hàng
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 // 3. Bảng Enterprise (Doanh nghiệp)
 model Enterprise {
-  id          Int      @id @default(autoincrement())
-  name        String   // Tên chuỗi, ví dụ: "Highlands Coffee"
-  userId      Int      @unique // Nối với tài khoản có role ENTERPRISE
-  user        User     @relation(fields: [userId], references: [id])
-  
-  branches    Branch[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id     Int    @id @default(autoincrement())
+  name   String // Tên chuỗi, ví dụ: "Highlands Coffee"
+  userId Int    @unique // Nối với tài khoản có role ENTERPRISE
+  user   User   @relation(fields: [userId], references: [id])
+
+  branches Branch[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // 4. Bảng Branch (Chi nhánh) - Nguồn data sống cho Min-Cost Max-Flow
 model Branch {
-  id            Int      @id @default(autoincrement())
-  name          String
-  address       String?
-  lat           Float    // Tọa độ để tính khoảng cách (Edge cost)
-  lng           Float
-  maxCapacity   Int      @default(50) // Sức chứa tối đa (Max Flow qua node)
-  currentLoad   Int      @default(0)  // Lượng khách do AI đếm real-time cập nhật vào đây
-  
-  enterpriseId  Int
-  enterprise    Enterprise @relation(fields: [enterpriseId], references: [id])
-  
+  id          Int     @id @default(autoincrement())
+  name        String
+  address     String?
+  lat         Float // Tọa độ để tính khoảng cách (Edge cost)
+  lng         Float
+  maxCapacity Int     @default(50) // Sức chứa tối đa (Max Flow qua node)
+  currentLoad Int     @default(0) // Lượng khách do AI đếm real-time cập nhật vào đây
+
+  cameraUrl String?
+
+  enterpriseId Int
+  enterprise   Enterprise @relation(fields: [enterpriseId], references: [id])
+
   // Quan hệ cho phần log điều hướng
-  routingsFrom  RoutingHistory[] @relation("FromBranch")
-  routingsTo    RoutingHistory[] @relation("ToBranch")
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  routingsFrom RoutingHistory[] @relation("FromBranch")
+  routingsTo   RoutingHistory[] @relation("ToBranch")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // 5. Bảng RoutingHistory (Lịch sử phân luồng)
 model RoutingHistory {
-  id             Int      @id @default(autoincrement())
-  userId         Int
-  user           User     @relation(fields: [userId], references: [id])
-  
-  fromBranchId   Int
-  fromBranch     Branch   @relation("FromBranch", fields: [fromBranchId], references: [id])
-  
-  toBranchId     Int
-  toBranch       Branch   @relation("ToBranch", fields: [toBranchId], references: [id])
-  
-  status         RoutingStatus @default(PENDING)
-  
+  id     Int  @id @default(autoincrement())
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  fromBranchId Int
+  fromBranch   Branch @relation("FromBranch", fields: [fromBranchId], references: [id])
+
+  toBranchId Int
+  toBranch   Branch @relation("ToBranch", fields: [toBranchId], references: [id])
+
+  status RoutingStatus @default(PENDING)
+
   // Thông số để show cho ban giám khảo thấy hệ thống hoạt động thông minh thế nào
-  incentiveGiven String?  // VD: "VOUCHER_20_PERCENT"
-  calculatedCost Float?   // Lưu lại cost mà thuật toán Min-Cost Max-Flow tính ra để tracking/debug
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  incentiveGiven String? // VD: "VOUCHER_20_PERCENT"
+  calculatedCost Float? // Lưu lại cost mà thuật toán Min-Cost Max-Flow tính ra để tracking/debug
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
