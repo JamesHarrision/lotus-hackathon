@@ -4,10 +4,54 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from state import live_traffic_counts
-from vision_worker import process_camera_stream
+from vision_worker import process_camera_stream, sio  # Import sio to use in events
 from ws_manager import manager
 
 app = FastAPI(title="Lotus Hack Traffic API")
+
+# Global variable to store the main event loop
+main_loop = None
+
+@app.on_event("startup")
+async def startup_event():
+    global main_loop
+    main_loop = asyncio.get_event_loop()
+    print("[SYSTEM] Main event loop captured.")
+
+# --- Socket.io Event Handlers (Listen to Backend Express) ---
+@sio.on('new_camera_added')
+def on_new_camera(data):
+    """
+    Khi Backend Express phát sự kiện 'new_camera_added', 
+    AI sẽ tự động nhận link cameraUrl và spawn thread xử lý mới.
+    """
+    global main_loop
+    branch_id = data.get('branchId')
+    camera_url = data.get('cameraUrl')
+    enterprise_id = data.get('enterpriseId')
+    
+    if not branch_id or not camera_url:
+        print(f"[SIO] Received invalid camera data: {data}")
+        return
+
+    cam_id = f"branch_{branch_id}"
+    print(f"[SIO] New camera detected! Branch: {branch_id}, URL: {camera_url}")
+
+    if cam_id in live_traffic_counts:
+        print(f"[SIO] Camera for branch {branch_id} is already being monitored.")
+        return
+
+    # Khởi tạo count = 0 trong state
+    live_traffic_counts[cam_id] = 0
+    
+    # Spawn thread mới để xử lý camera stream, sử dụng main_loop đã lưu
+    thread = threading.Thread(
+        target=process_camera_stream,
+        args=(cam_id, camera_url, main_loop, branch_id, enterprise_id),
+        daemon=True
+    )
+    thread.start()
+    print(f"[SIO] Started worker thread for branch {branch_id}")
 
 app.add_middleware(
     CORSMiddleware,

@@ -27,12 +27,19 @@ except Exception as e:
 
 model = YOLO("yolo26n.pt") # Ensure correct model name
 
-def process_camera_stream(camera_id: str, source_path: str, loop, branch_id: int, enteprise_id: int):
+def process_camera_stream(camera_id: str, source_path: str, loop, branch_id: int, enterprise_id: int):
     tracker = sv.ByteTrack()
-    cap = cv2.VideoCapture(int(source_path) if source_path == "0" else source_path)
+    
+    # Check if source_path is a local video file, or camera index, or URL
+    if source_path.isdigit():
+        cap = cv2.VideoCapture(int(source_path))
+    else:
+        cap = cv2.VideoCapture(source_path)
     
     last_emit_time = 0 # To track the 2-3 second delay
     
+    print(f"[Worker] Processing stream: {source_path} for branch {branch_id}")
+
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret: break
@@ -46,17 +53,15 @@ def process_camera_stream(camera_id: str, source_path: str, loop, branch_id: int
         live_traffic_counts[camera_id] = current_count
         
         # --- LOGIC 1: Local Dashboard (Internal WebSocket) ---
-        # Still push every 30 frames for a smooth local UI
         payload = {"type": "update", "camera_id": camera_id, "count": current_count, "total": sum(live_traffic_counts.values())}
         asyncio.run_coroutine_threadsafe(manager.broadcast(payload), loop)
 
         # --- LOGIC 2: Friend's Express Backend (Socket.io) ---
-        # Emit 'update_load' only every 2 seconds as requested
         current_time = time.time()
         if current_time - last_emit_time >= 2:
             if sio.connected:
                 sio.emit('update_load', {
-                    'entepriseID': enteprise_id,
+                    'enterpriseId': enterprise_id,
                     'branchId': branch_id,
                     'currentLoad': current_count
                 })
@@ -67,5 +72,6 @@ def process_camera_stream(camera_id: str, source_path: str, loop, branch_id: int
             time.sleep(0.01)
 
     cap.release()
+    print(f"[Worker] Finished stream: {camera_id}")
     if camera_id in live_traffic_counts:
         del live_traffic_counts[camera_id]
