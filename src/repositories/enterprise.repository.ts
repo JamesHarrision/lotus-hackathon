@@ -18,7 +18,7 @@ export class EnterpriseRepository {
     });
   }
 
-  async findByIdWithBranches(id: number): Promise<Enterprise | null> {
+  async findByIdWithBranches(id: number) {
     return prisma.enterprise.findUnique({
       where: { id },
       include: {

@@ -7,6 +7,8 @@ import userRoutes from './routes/user.route';
 import enterpriseRoutes from './routes/enterprise.route';
 import branchRoutes from './routes/branch.route';
 import routingRoutes from './routes/routing.route';
+import { errorMiddleware } from './middlewares/error.middleware';
+import { setupSwagger } from './utils/swagger';
 
 const app = express();
 
@@ -14,6 +16,9 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+
+// Setup Swagger Documentation
+setupSwagger(app);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
@@ -28,14 +33,14 @@ app.get('/', async (req, res) => {
     res.status(200).json({
       message: 'Welcome to lotus',
       database: 'Connected to MySQL',
-      userCount: userCount,
+      stats: { users: userCount }
     });
   } catch (error) {
-    res.status(500).json({
-      message: 'Database connection failed',
-      error: error,
-    });
+    res.status(500).json({ message: 'Database connection failed' });
   }
 });
+
+// Centralized Error Handling Middleware (Must be last)
+app.use(errorMiddleware);
 
 export default app;

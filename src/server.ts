@@ -33,8 +33,13 @@ io.on('connection', (socket) => {
       
       console.log(`[Socket] Branch ${branchId} updated: ${updatedData.currentLoad}/${updatedData.maxCapacity}`);
       
-      // Có thể emit ngược lại cho các client khác (Frontend) nếu cần
-      // io.emit('branch_load_changed', { branchId, ...updatedData });
+      // Broadcast dữ liệu mới cho tất cả các client (Frontend Dashboard)
+      io.emit('branch_load_changed', { 
+        branchId, 
+        currentLoad: updatedData.currentLoad,
+        maxCapacity: updatedData.maxCapacity,
+        loadPercentage: Math.round((updatedData.currentLoad / updatedData.maxCapacity) * 10000) / 100
+      });
 
     } catch (error: any) {
       console.error(`[Socket] Error updating load for branch:`, error.message);

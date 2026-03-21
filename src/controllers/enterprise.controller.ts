@@ -63,6 +63,26 @@ export class EnterpriseController {
     }
   };
 
+  getDashboard = async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id as string);
+      if (isNaN(id)) {
+        return res.status(400).json({ success: false, message: "Invalid ID" });
+      }
+      const dashboardData = await this.enterpriseService.getDashboardData(id);
+      res.status(200).json({
+        success: true,
+        data: dashboardData,
+      });
+    } catch (error: any) {
+      const statusCode = error.message === "Enterprise not found" ? 404 : 500;
+      res.status(statusCode).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+
   create = async (req: Request, res: Response) => {
     try {
       const { name, userId } = req.body;

@@ -21,6 +21,36 @@ export class EnterpriseService {
     return enterprise;
   }
 
+  async getDashboardData(id: number) {
+    const enterprise = await this.enterpriseRepository.findByIdWithBranches(id);
+    if (!enterprise) {
+      throw new Error("Enterprise not found");
+    }
+
+    const branches = enterprise.branches;
+    const totalCapacity = branches.reduce((sum: number, b: any) => sum + b.maxCapacity, 0);
+    const totalCurrentLoad = branches.reduce((sum: number, b: any) => sum + b.currentLoad, 0);
+    const averageLoadPercentage = totalCapacity > 0 ? (totalCurrentLoad / totalCapacity) * 100 : 0;
+
+    return {
+      enterpriseName: enterprise.name,
+      stats: {
+        totalBranches: branches.length,
+        totalCapacity,
+        totalCurrentLoad,
+        averageLoadPercentage: Math.round(averageLoadPercentage * 100) / 100
+      },
+      branches: branches.map((b: any) => ({
+        id: b.id,
+        name: b.name,
+        currentLoad: b.currentLoad,
+        maxCapacity: b.maxCapacity,
+        loadPercentage: Math.round((b.currentLoad / b.maxCapacity) * 10000) / 100,
+        status: b.currentLoad >= b.maxCapacity ? 'FULL' : (b.currentLoad > b.maxCapacity * 0.8 ? 'CROWDED' : 'NORMAL')
+      }))
+    };
+  }
+
   async getEnterpriseGraph(id: number) {
     const enterprise = await this.enterpriseRepository.findByIdWithBranches(id);
     if (!enterprise) {

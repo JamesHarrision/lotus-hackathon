@@ -25,6 +25,31 @@ export class BranchController {
     }
   };
 
+  getNearby = async (req: Request, res: Response) => {
+    try {
+      const { lat, lng, radius } = req.query;
+      if (!lat || !lng) {
+        return res.status(400).json({ success: false, message: "Vui lòng cung cấp tọa độ lat, lng" });
+      }
+      
+      const branches = await this.branchService.getNearbyBranches(
+        parseFloat(lat as string),
+        parseFloat(lng as string),
+        radius ? parseFloat(radius as string) : 5
+      );
+
+      res.status(200).json({
+        success: true,
+        data: branches,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+
   getById = async (req: Request, res: Response) => {
     try {
       const id = parseInt(req.params.id as string);
