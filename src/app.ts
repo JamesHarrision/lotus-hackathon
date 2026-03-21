@@ -7,6 +7,7 @@ import userRoutes from './routes/user.route';
 import enterpriseRoutes from './routes/enterprise.route';
 import branchRoutes from './routes/branch.route';
 import routingRoutes from './routes/routing.route';
+import exaRoutes from './routes/exa.route';
 import { errorMiddleware } from './middlewares/error.middleware';
 import { setupSwagger } from './utils/swagger';
 
@@ -25,6 +26,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/enterprises", enterpriseRoutes);
 app.use("/api/branches", branchRoutes);
 app.use("/api/routings", routingRoutes);
+app.use("/api/exa", exaRoutes);
 
 // Test Route
 app.get('/', async (req, res) => {
