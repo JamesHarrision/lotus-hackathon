@@ -4,8 +4,8 @@ import asyncio
 import socketio # NEW
 from ultralytics import YOLO
 import supervision as sv
-from state import live_traffic_counts
-from ws_manager import manager
+from models.state import live_traffic_counts
+from .ws_manager import manager
 
 # 1. Initialize the Socket.io Client for your friend's Express server
 sio = socketio.Client()
