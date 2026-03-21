@@ -1,6 +1,7 @@
 import { RoutingRepository } from "../repositories/routing.repository";
 import { BranchRepository } from "../repositories/branch.repository";
 import { EnterpriseRepository } from "../repositories/enterprise.repository";
+import { IncentiveRepository } from "../repositories/incentive.repository";
 import { buildEnterpriseBranchGraph, getUserToBranchesMatrix } from "../utils/orsMatrix.util";
 import { RoutingStatus } from "@prisma/client";
 import axios from "axios";
@@ -9,11 +10,13 @@ export class RoutingService {
   private routingRepository: RoutingRepository;
   private branchRepository: BranchRepository;
   private enterpriseRepository: EnterpriseRepository;
+  private incentiveRepository: IncentiveRepository;
 
   constructor() {
     this.routingRepository = new RoutingRepository();
     this.branchRepository = new BranchRepository();
     this.enterpriseRepository = new EnterpriseRepository();
+    this.incentiveRepository = new IncentiveRepository();
   }
 
   async recommendBranch(userId: number, enterpriseId: number, userLat: number, userLng: number, currentBranchId?: number) {
@@ -61,14 +64,25 @@ export class RoutingService {
       
       const { recommended_branch_id, estimated_wait_time, cost } = aiResponse.data;
 
-      // 4. Save to RoutingHistory
+      // 4. Check for applicable incentive if branch is changed
+      let incentiveGiven = null;
+      if (parseInt(recommended_branch_id) !== (currentBranchId || branches[0].id)) {
+        const incentives = await this.incentiveRepository.findAll(enterpriseId);
+        if (incentives.length > 0) {
+          // Just pick the first active incentive for now
+          incentiveGiven = incentives[0].code;
+        }
+      }
+
+      // 5. Save to RoutingHistory
       return this.routingRepository.create({
         userId,
         fromBranchId: currentBranchId || branches[0].id,
         toBranchId: parseInt(recommended_branch_id),
         status: 'PENDING',
         calculatedCost: cost,
-        estimatedWaitTime: estimated_wait_time
+        estimatedWaitTime: estimated_wait_time,
+        incentiveGiven: incentiveGiven || undefined
       });
 
     } catch (error: any) {

@@ -49,7 +49,8 @@ model Enterprise {
   userId Int    @unique // Nối với tài khoản có role ENTERPRISE
   user   User   @relation(fields: [userId], references: [id])
 
-  branches Branch[]
+  branches   Branch[]
+  incentives Incentive[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -73,6 +74,9 @@ model Branch {
   // Quan hệ cho phần log điều hướng
   routingsFrom RoutingHistory[] @relation("FromBranch")
   routingsTo   RoutingHistory[] @relation("ToBranch")
+
+  // Quan hệ cho phần log tải (analytics)
+  loadLogs BranchLoadLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -99,4 +103,31 @@ model RoutingHistory {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// 6. Bảng BranchLoadLog (Lịch sử tải của chi nhánh - phục vụ Analytics)
+model BranchLoadLog {
+  id          Int    @id @default(autoincrement())
+  branchId    Int
+  branch      Branch @relation(fields: [branchId], references: [id])
+  currentLoad Int
+  timestamp   DateTime @default(now())
+
+  @@index([branchId, timestamp])
+}
+
+// 7. Bảng Incentive (Kho lưu trữ Voucher của doanh nghiệp)
+model Incentive {
+  id           Int        @id @default(autoincrement())
+  enterpriseId Int
+  enterprise   Enterprise @relation(fields: [enterpriseId], references: [id])
+  
+  code         String     @unique // VD: "HIGH50", "PHELA20"
+  description  String?    // VD: "Giảm 50% khi chuyển vùng sang chi nhánh vắng hơn"
+  discountVal  Float      // Giá trị giảm (VD: 50.0)
+  isPercentage Boolean    @default(true) // Giảm theo % hay tiền mặt
+
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }

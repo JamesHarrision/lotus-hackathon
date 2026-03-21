@@ -1,6 +1,7 @@
 import { EnterpriseRepository } from "../repositories/enterprise.repository";
 import { Prisma } from "@prisma/client";
 import { buildEnterpriseBranchGraph } from "../utils/orsMatrix.util";
+import { prisma } from "../config/prisma.config";
 
 export class EnterpriseService {
   private enterpriseRepository: EnterpriseRepository;
@@ -47,6 +48,61 @@ export class EnterpriseService {
         maxCapacity: b.maxCapacity,
         loadPercentage: Math.round((b.currentLoad / b.maxCapacity) * 10000) / 100,
         status: b.currentLoad >= b.maxCapacity ? 'FULL' : (b.currentLoad > b.maxCapacity * 0.8 ? 'CROWDED' : 'NORMAL')
+      }))
+    };
+  }
+
+  async getAnalyticsData(id: number) {
+    const enterprise = await this.enterpriseRepository.findByIdWithBranches(id);
+    if (!enterprise) {
+      throw new Error("Enterprise not found");
+    }
+
+    const branchIds = enterprise.branches.map(b => b.id);
+
+    // Get logs for the last 24 hours
+    const last24Hours = new Date();
+    last24Hours.setHours(last24Hours.getHours() - 24);
+
+    const logs = await prisma.branchLoadLog.findMany({
+      where: {
+        branchId: { in: branchIds },
+        timestamp: { gte: last24Hours }
+      },
+      orderBy: { timestamp: 'asc' }
+    });
+
+    // Group logs by hour for the chart
+    const hourlyData: any[] = [];
+    for (let i = 0; i < 24; i++) {
+      const hourDate = new Date();
+      hourDate.setHours(hourDate.getHours() - (23 - i));
+      hourDate.setMinutes(0, 0, 0);
+      
+      const hourLabel = `${hourDate.getHours()}:00`;
+      const hourLogs = logs.filter(log => {
+        const logDate = new Date(log.timestamp);
+        return logDate.getHours() === hourDate.getHours() && logDate.getDate() === hourDate.getDate();
+      });
+
+      const avgLoad = hourLogs.length > 0 
+        ? hourLogs.reduce((sum, log) => sum + log.currentLoad, 0) / hourLogs.length 
+        : 0;
+
+      hourlyData.push({
+        time: hourLabel,
+        avgLoad: Math.round(avgLoad * 10) / 10,
+        logCount: hourLogs.length
+      });
+    }
+
+    return {
+      enterpriseName: enterprise.name,
+      timeSeries: hourlyData,
+      branchBreakdown: enterprise.branches.map(b => ({
+        name: b.name,
+        currentLoad: b.currentLoad,
+        maxCapacity: b.maxCapacity
       }))
     };
   }

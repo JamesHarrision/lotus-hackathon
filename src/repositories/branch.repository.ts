@@ -42,14 +42,23 @@ export class BranchRepository {
   }
 
   async updateLoad(id: number, currentLoad: number): Promise<{ currentLoad: number; maxCapacity: number }> {
-    const branch = await prisma.branch.update({
-      where: { id },
-      data: { currentLoad },
-      select: {
-        currentLoad: true,
-        maxCapacity: true,
-      },
-    });
+    // Run update and log creation in a transaction
+    const [branch] = await prisma.$transaction([
+      prisma.branch.update({
+        where: { id },
+        data: { currentLoad },
+        select: {
+          currentLoad: true,
+          maxCapacity: true,
+        },
+      }),
+      prisma.branchLoadLog.create({
+        data: {
+          branchId: id,
+          currentLoad: currentLoad
+        }
+      })
+    ]);
     return branch;
   }
 

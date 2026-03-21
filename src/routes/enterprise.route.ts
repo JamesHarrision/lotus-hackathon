@@ -51,6 +51,24 @@ router.get("/:id", enterpriseController.getById);
  *         description: Real-time load stats for all branches
  */
 router.get("/:id/dashboard", enterpriseController.getDashboard);
+
+/**
+ * @swagger
+ * /api/enterprises/{id}/analytics:
+ *   get:
+ *     summary: Get enterprise historical analytics data
+ *     tags: [Enterprises]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Historical load data for charts
+ */
+router.get("/:id/analytics", enterpriseController.getAnalytics);
 router.get("/:id/graph", enterpriseController.getGraph);
 router.post("/", enterpriseController.create);
 router.put("/:id", enterpriseController.update);

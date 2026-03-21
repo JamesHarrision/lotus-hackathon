@@ -61,7 +61,11 @@ async function main() {
   console.log('Đã tạo Enterprise: highlands@enterprise.com / hackathon123');
 
   // 4. Tạo các Branch cho Highlands (Địa chỉ thật tại HCM)
-  // Xóa branch cũ để tránh lỗi duplicate khi chạy lại seed
+  // Xóa dữ liệu liên quan trước khi xóa branch
+  const highlandsBranches = await prisma.branch.findMany({ where: { enterpriseId: highlandsEnt.id } });
+  const highlandsBranchIds = highlandsBranches.map(b => b.id);
+  await prisma.branchLoadLog.deleteMany({ where: { branchId: { in: highlandsBranchIds } } });
+  await prisma.routingHistory.deleteMany({ where: { OR: [{ fromBranchId: { in: highlandsBranchIds } }, { toBranchId: { in: highlandsBranchIds } }] } });
   await prisma.branch.deleteMany({ where: { enterpriseId: highlandsEnt.id } });
 
   const branches = [
@@ -132,6 +136,10 @@ async function main() {
     },
   });
 
+  const pheLaOldBranches = await prisma.branch.findMany({ where: { enterpriseId: pheLaEnt.id } });
+  const pheLaBranchIds = pheLaOldBranches.map(b => b.id);
+  await prisma.branchLoadLog.deleteMany({ where: { branchId: { in: pheLaBranchIds } } });
+  await prisma.routingHistory.deleteMany({ where: { OR: [{ fromBranchId: { in: pheLaBranchIds } }, { toBranchId: { in: pheLaBranchIds } }] } });
   await prisma.branch.deleteMany({ where: { enterpriseId: pheLaEnt.id } });
 
   const pheLaBranches = [
@@ -163,6 +171,49 @@ async function main() {
     });
   }
   console.log(`Đã tạo ${pheLaBranches.length} chi nhánh cho Phê La.`);
+
+  // 6. Tạo Incentive mẫu
+  await prisma.incentive.upsert({
+    where: { code: 'HIGHLANDS50' },
+    update: {},
+    create: {
+      code: 'HIGHLANDS50',
+      description: 'Giảm 50% khi di chuyển sang chi nhánh vắng hơn',
+      discountVal: 50,
+      isPercentage: true,
+      enterpriseId: highlandsEnt.id
+    }
+  });
+
+  await prisma.incentive.upsert({
+    where: { code: 'PHELA20' },
+    update: {},
+    create: {
+      code: 'PHELA20',
+      description: 'Tặng voucher 20k khi đổi chi nhánh',
+      discountVal: 20000,
+      isPercentage: false,
+      enterpriseId: pheLaEnt.id
+    }
+  });
+  console.log('Đã tạo Incentive mẫu.');
+
+  // 7. Tạo Load History giả lập cho 24h qua
+  console.log('Đang tạo lịch sử tải giả lập...');
+  const allBranches = await prisma.branch.findMany();
+  for (const branch of allBranches) {
+    for (let i = 0; i < 24; i++) {
+      const timestamp = new Date();
+      timestamp.setHours(timestamp.getHours() - i);
+      await prisma.branchLoadLog.create({
+        data: {
+          branchId: branch.id,
+          currentLoad: Math.floor(Math.random() * branch.maxCapacity),
+          timestamp: timestamp
+        }
+      });
+    }
+  }
 
   console.log('\nSeed dữ liệu hoàn tất! Thông tin tài khoản test:');
   console.log('--------------------------------------------------');

@@ -5,6 +5,10 @@ export class RoutingRepository {
   async findById(id: number): Promise<RoutingHistory | null> {
     return prisma.routingHistory.findUnique({
       where: { id },
+      include: {
+        fromBranch: true,
+        toBranch: true
+      }
     });
   }
 
@@ -19,6 +23,10 @@ export class RoutingRepository {
   }): Promise<RoutingHistory> {
     return prisma.routingHistory.create({
       data,
+      include: {
+        fromBranch: true,
+        toBranch: true
+      }
     });
   }
 
