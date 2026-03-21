@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.route';
 import userRoutes from './routes/user.route';
 import enterpriseRoutes from './routes/enterprise.route';
 import branchRoutes from './routes/branch.route';
+import routingRoutes from './routes/routing.route';
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/enterprises", enterpriseRoutes);
 app.use("/api/branches", branchRoutes);
+app.use("/api/routings", routingRoutes);
 
 // Test Route
 app.get('/', async (req, res) => {
