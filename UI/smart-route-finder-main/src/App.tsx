@@ -17,6 +17,10 @@ import Home from "./pages/Home";
 import EnterpriseDetails from "./pages/EnterpriseDetails";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
+import Branches from "./pages/admin/Branches";
+import Analytics from "./pages/admin/Analytics";
+import SuperAdminLayout from "./layouts/SuperAdminLayout";
+import SuperAdminDashboard from "./pages/superadmin/Dashboard";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const App = () => {
@@ -45,6 +49,15 @@ const App = () => {
               <Route element={<ProtectedRoute requiredRole="ENTERPRISE" />}>
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
+                  <Route path="branches" element={<Branches />} />
+                  <Route path="analytics" element={<Analytics />} />
+                </Route>
+              </Route>
+
+              {/* Protected Super Admin Routes */}
+              <Route element={<ProtectedRoute requiredRole="SUPERADMIN" />}>
+                <Route path="/superadmin" element={<SuperAdminLayout />}>
+                  <Route index element={<SuperAdminDashboard />} />
                 </Route>
               </Route>
 

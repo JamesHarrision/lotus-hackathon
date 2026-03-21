@@ -70,6 +70,24 @@ router.get("/nearby", branchController.getNearby);
  */
 router.get("/:id", branchController.getById);
 
+/**
+ * @swagger
+ * /api/branches/geocode:
+ *   get:
+ *     summary: Convert address to coordinates using OpenRouteService
+ *     tags: [Branches]
+ *     parameters:
+ *       - in: query
+ *         name: address
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Geocoding result
+ */
+router.get("/geocode/search", authMiddleware, branchController.geocode);
+
 // Các route thay đổi dữ liệu cần đăng nhập (ENTERPRISE hoặc SUPERADMIN)
 router.post("/", authMiddleware, roleMiddleware(['ENTERPRISE', 'SUPERADMIN']), branchController.create);
 router.put("/:id", authMiddleware, roleMiddleware(['ENTERPRISE', 'SUPERADMIN']), branchController.update);

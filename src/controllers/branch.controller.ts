@@ -152,6 +152,25 @@ export class BranchController {
       res.status(statusCode).json({
         success: false,
         message: error.message,
+        });
+    }
+  };
+
+  geocode = async (req: Request, res: Response) => {
+    try {
+      const { address } = req.query;
+      if (!address) {
+        return res.status(400).json({ success: false, message: "Missing address query parameter" });
+      }
+      const coordinates = await this.branchService.geocode(address as string);
+      res.status(200).json({
+        success: true,
+        data: coordinates,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
       });
     }
   };

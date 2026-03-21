@@ -26,13 +26,13 @@ const AdminLayout = () => {
             <LayoutDashboard className="mr-2 h-4 w-4" />
             Dashboard
           </Button>
-          <Button variant="ghost" className="w-full justify-start text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50">
+          <Button variant="ghost" className="w-full justify-start text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50" onClick={() => navigate("/admin/branches")}>
             <MapPin className="mr-2 h-4 w-4" />
             Branches
           </Button>
-          <Button variant="ghost" className="w-full justify-start text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50">
+          <Button variant="ghost" className="w-full justify-start text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50" onClick={() => navigate("/admin/analytics")}>
             <Settings className="mr-2 h-4 w-4" />
-            Settings
+            Analytics
           </Button>
         </nav>
 
@@ -46,11 +46,18 @@ const AdminLayout = () => {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto">
-        <div className="p-4 md:hidden border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex justify-between items-center">
-            <h2 className="text-lg font-bold text-primary">Enterprise Panel</h2>
-            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-red-500">
-              <LogOut className="h-5 w-5" />
-            </Button>
+        <div className="p-4 md:hidden border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-bold text-primary">Enterprise Panel</h2>
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-red-500">
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-2 noscrollbar">
+              <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="whitespace-nowrap rounded-full">Dashboard</Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/admin/branches")} className="whitespace-nowrap rounded-full">Branches</Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/admin/analytics")} className="whitespace-nowrap rounded-full">Analytics</Button>
+            </div>
         </div>
         <div className="p-4 md:p-8">
           <Outlet />

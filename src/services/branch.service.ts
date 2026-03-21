@@ -86,4 +86,8 @@ export class BranchService {
     }
     return this.branchRepository.updateLoad(id, currentLoad);
   }
+
+  async geocode(address: string) {
+    return getCoordinatesFromAddress(address);
+  }
 }
