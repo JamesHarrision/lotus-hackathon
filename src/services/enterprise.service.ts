@@ -30,6 +30,10 @@ export class EnterpriseService {
   }
 
   async createEnterprise(data: { name: string; userId: number }) {
+    const existingEnterprise = await this.enterpriseRepository.findByUserId(data.userId);
+    if (existingEnterprise) {
+      throw new Error(`User with ID ${data.userId} already has an associated Enterprise`);
+    }
     return this.enterpriseRepository.create(data);
   }
 

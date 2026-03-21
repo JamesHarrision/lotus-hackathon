@@ -12,6 +12,12 @@ export class EnterpriseRepository {
     });
   }
 
+  async findByUserId(userId: number): Promise<Enterprise | null> {
+    return prisma.enterprise.findUnique({
+      where: { userId },
+    });
+  }
+
   async findByIdWithBranches(id: number): Promise<Enterprise | null> {
     return prisma.enterprise.findUnique({
       where: { id },
