@@ -80,7 +80,7 @@ const Landing = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-white text-zinc-900 dark:bg-zinc-950 dark:text-white selection:bg-indigo-500/30 overflow-x-hidden transition-colors duration-500">
       {/* Abstract Background Shapes */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse" />
@@ -96,13 +96,13 @@ const Landing = () => {
           </div>
           <span className="text-xl font-black tracking-tighter uppercase italic">YOGO</span>
         </div>
-        <div className="hidden md:flex items-center gap-8 text-sm font-bold text-zinc-400">
-          <a href="#features" className="hover:text-white transition-colors">Intelligence</a>
-          <a href="#solutions" className="hover:text-white transition-colors">Solutions</a>
-          <a href="#enterprise" className="hover:text-white transition-colors">Enterprise</a>
+        <div className="hidden md:flex items-center gap-8 text-sm font-bold text-zinc-500 dark:text-zinc-400">
+          <a href="#features" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Intelligence</a>
+          <a href="#solutions" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Solutions</a>
+          <a href="#enterprise" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Enterprise</a>
         </div>
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate("/login")} className="font-bold hover:bg-white/5">Sign In</Button>
+          <Button variant="ghost" onClick={() => navigate("/login")} className="font-bold hover:bg-black/5 dark:hover:bg-white/5">Sign In</Button>
           <Button onClick={() => navigate("/register")} className="rounded-full bg-indigo-600 hover:bg-indigo-700 font-bold px-6 shadow-xl shadow-indigo-600/20 active:scale-95 transition-all">
             Join the Network
           </Button>
@@ -117,7 +117,7 @@ const Landing = () => {
           animate="visible"
           className="space-y-8"
         >
-          <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-black uppercase tracking-widest text-indigo-400">
+          <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-black uppercase tracking-widest text-indigo-500 dark:text-indigo-400">
             <div className="w-2 h-2 bg-indigo-500 rounded-full animate-ping" />
             AI Algorithm v2.4 Live
           </motion.div>
@@ -131,10 +131,10 @@ const Landing = () => {
             Eliminate wait times and maximize branch efficiency with our real-time AI routing engine. Smart incentives for users, deep analytics for enterprises.
           </motion.p>
           <motion.div variants={itemVariants} className="flex flex-col md:flex-row gap-4">
-            <Button
+              <Button
               size="lg"
               onClick={() => navigate("/login")}
-              className="h-16 px-8 rounded-2xl bg-white text-black hover:bg-zinc-200 font-black text-lg group transition-all active:scale-95 shadow-xl shadow-white/10"
+              className="h-16 px-8 rounded-2xl bg-zinc-900 text-white dark:bg-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 font-black text-lg group transition-all active:scale-95 shadow-xl shadow-black/10 dark:shadow-white/10"
             >
               Launch App <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
@@ -144,7 +144,7 @@ const Landing = () => {
                 placeholder="Ask AI anything about queue tech..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-16 bg-zinc-900/50 border border-zinc-800 rounded-2xl px-6 pr-16 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-medium placeholder:text-zinc-600"
+                className="w-full h-16 bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-6 pr-16 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-medium placeholder:text-zinc-500 dark:placeholder:text-zinc-600 text-zinc-900 dark:text-white"
                />
                <button 
                 type="submit"
@@ -158,11 +158,11 @@ const Landing = () => {
           <motion.div variants={itemVariants} className="flex items-center gap-6 pt-4">
             <div className="flex -space-x-3">
               {[1, 2, 3, 4].map(i => (
-                <div key={i} className={`w-10 h-10 rounded-full border-2 border-zinc-950 bg-zinc-800 flex items-center justify-center text-[10px] font-bold`}>
+                <div key={i} className={`w-10 h-10 rounded-full border-2 border-white dark:border-zinc-950 bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-zinc-600 dark:text-zinc-300`}>
                   USR{i}
                 </div>
               ))}
-              <div className="w-10 h-10 rounded-full border-2 border-zinc-950 bg-indigo-600 flex items-center justify-center text-[10px] font-bold">
+              <div className="w-10 h-10 rounded-full border-2 border-white dark:border-zinc-950 bg-indigo-600 flex items-center justify-center text-[10px] font-bold text-white">
                 +2k
               </div>
             </div>
@@ -177,7 +177,7 @@ const Landing = () => {
           className="relative group"
         >
           <div className="absolute inset-0 bg-gradient-to-tr from-indigo-600/40 to-violet-600/40 blur-[100px] group-hover:blur-[120px] transition-all" />
-          <div className="relative rounded-[2.5rem] border border-white/10 bg-zinc-900/50 backdrop-blur-3xl p-4 overflow-hidden shadow-2xl">
+          <div className="relative rounded-[2.5rem] border border-zinc-200 dark:border-white/10 bg-white/80 dark:bg-zinc-900/50 backdrop-blur-3xl p-4 overflow-hidden shadow-2xl">
             <div className="flex items-center justify-between mb-4 px-2">
               <div className="flex gap-1.5">
                 <div className="w-3 h-3 rounded-full bg-rose-500/50" />
@@ -192,23 +192,23 @@ const Landing = () => {
             {/* Mock Dashboard Preview */}
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="h-24 rounded-2xl bg-zinc-800/50 border border-white/5 p-4">
+                <div className="h-24 rounded-2xl bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/5 p-4">
                   <div className="text-[10px] font-black uppercase text-zinc-500 mb-1">Total Capacity</div>
                   <div className="text-2xl font-black">94.2%</div>
                   <div className="w-full h-1 bg-zinc-700 rounded-full mt-2 overflow-hidden">
                     <div className="w-[94%] h-full bg-indigo-500" />
                   </div>
                 </div>
-                <div className="h-24 rounded-2xl bg-white/5 border border-white/5 p-4">
-                  <div className="text-[10px] font-black uppercase text-indigo-400 mb-1">Optimal Shift</div>
-                  <div className="text-2xl font-black">+18.4%</div>
+                <div className="h-24 rounded-2xl bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5 p-4">
+                  <div className="text-[10px] font-black uppercase text-indigo-500 dark:text-indigo-400 mb-1">Optimal Shift</div>
+                  <div className="text-2xl font-black text-zinc-900 dark:text-white">+18.4%</div>
                   <div className="text-[10px] text-zinc-500 mt-1 font-bold">Efficiency Boost</div>
                 </div>
               </div>
-              <div className="h-48 rounded-2xl bg-zinc-800/50 border border-white/5 flex items-center justify-center relative group">
+              <div className="h-48 rounded-2xl bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-white/5 flex items-center justify-center relative group overflow-hidden">
                 <BarChart3 className="w-20 h-20 text-indigo-500/20 group-hover:scale-110 transition-transform duration-700" />
-                <div className="absolute inset-0 flex flex-col justify-end p-6 bg-gradient-to-t from-zinc-950/80 to-transparent">
-                  <div className="font-bold text-sm">Real-time Load Balancer</div>
+                <div className="absolute inset-0 flex flex-col justify-end p-6 bg-gradient-to-t from-white/90 dark:from-zinc-950/80 to-transparent">
+                  <div className="font-bold text-sm text-zinc-900 dark:text-white">Real-time Load Balancer</div>
                   <div className="text-xs text-zinc-500">Syncing with 12 edge nodes...</div>
                 </div>
               </div>
@@ -233,7 +233,7 @@ const Landing = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="p-8 rounded-[2rem] bg-zinc-900/50 border border-zinc-800 hover:border-indigo-500/50 transition-all group flex flex-col h-full"
+                className="p-8 rounded-[2rem] bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/50 transition-all group flex flex-col h-full shadow-sm"
               >
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
@@ -246,7 +246,7 @@ const Landing = () => {
                 <h3 className="text-xl font-black mb-4 tracking-tight line-clamp-2 group-hover:text-indigo-400 transition-colors">
                   {result.title}
                 </h3>
-                <p className="text-zinc-500 leading-relaxed font-medium text-sm mb-6 flex-1 line-clamp-3">
+                <p className="text-zinc-600 dark:text-zinc-500 leading-relaxed font-medium text-sm mb-6 flex-1 line-clamp-3">
                   {result.author ? `By ${result.author} • ` : ''} Discovery powered by Exa Semantic Intelligence.
                 </p>
                 <a 
@@ -284,7 +284,7 @@ const Landing = () => {
               <motion.div
                 key={i}
                 whileHover={{ y: -10 }}
-                className="p-8 rounded-[2rem] bg-zinc-900/50 border border-zinc-800 hover:border-indigo-500/50 transition-all group"
+                className="p-8 rounded-[2rem] bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/50 transition-all group shadow-sm"
               >
                 <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${f.color} flex items-center justify-center mb-6 shadow-xl shadow-indigo-600/10 group-hover:scale-110 transition-transform`}>
                   {f.icon}
@@ -326,7 +326,7 @@ const Landing = () => {
           </div>
           <div className="relative">
             <div className="absolute inset-0 bg-emerald-500/20 blur-[100px] pointer-events-none" />
-            <div className="relative bg-zinc-900 border border-white/10 rounded-3xl p-8 overflow-hidden shadow-2xl">
+            <div className="relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-3xl p-8 overflow-hidden shadow-xl dark:shadow-2xl">
               <div className="flex items-center justify-between mb-8">
                 <span className="text-xs font-black uppercase tracking-widest text-zinc-500">Global Flow Monitor</span>
                 <LineChart className="w-5 h-5 text-emerald-500" />
@@ -386,7 +386,7 @@ const Landing = () => {
       <ContactBox onOpenAIChat={() => setIsChatOpen(true)} />
 
       {/* App Stats Section */}
-      <section className="bg-zinc-900/30 border-y border-white/5 py-24 relative overflow-hidden">
+      <section className="bg-zinc-50 dark:bg-zinc-900/30 border-y border-zinc-200 dark:border-white/5 py-24 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 text-center group">
           {[
             { label: "Active Nodes", value: "850+" },
@@ -428,15 +428,15 @@ const Landing = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-20 border-t border-white/5 px-6 md:px-12 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12 text-zinc-500 font-medium text-sm">
-        <div className="flex items-center gap-2 grayscale brightness-50">
+      <footer className="py-20 border-t border-zinc-200 dark:border-white/5 px-6 md:px-12 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12 text-zinc-500 font-medium text-sm">
+        <div className="flex items-center gap-2 grayscale dark:brightness-50">
           <Zap className="w-5 h-5 fill-zinc-500" />
           <span className="font-black tracking-tighter uppercase italic">YOGO AI</span>
         </div>
         <div className="flex gap-12">
-          <a href="#" className="hover:text-white transition-colors">Privacy</a>
-          <a href="#" className="hover:text-white transition-colors">Terms</a>
-          <a href="#" className="hover:text-white transition-colors">Security</a>
+          <a href="#" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Privacy</a>
+          <a href="#" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Terms</a>
+          <a href="#" className="hover:text-zinc-900 dark:hover:text-white transition-colors">Security</a>
         </div>
         <div>
           © 2026 YOGO Labs. Engineered with precision.

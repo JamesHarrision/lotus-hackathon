@@ -56,13 +56,13 @@ export const ContactBox = ({ onOpenAIChat }: { onOpenAIChat: () => void }) => {
                 </div>
               </a>
               
-              <a href="tel:+8419001560" className="flex items-center gap-4 p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
+              <a href="tel:0848489039" className="flex items-center gap-4 p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
                   <Phone className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="text-[10px] font-black text-zinc-500 uppercase">Call Support</div>
-                  <div className="text-sm font-bold">1900 1560</div>
+                  <div className="text-sm font-bold">084 848 9039</div>
                 </div>
               </a>
 

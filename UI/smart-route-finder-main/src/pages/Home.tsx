@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiClient } from "../lib/axios";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { MapPin, Building2, ChevronRight, LogIn, Sparkles, Home as HomeIcon, Zap } from "lucide-react";
+import { MapPin, Building2, ChevronRight, LogIn, Sparkles, Home as HomeIcon, Zap, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { CardSkeleton } from "@/components/SkeletonLoader";
@@ -76,9 +76,17 @@ const Home = () => {
               </p>
             </div>
             <motion.div
+               className="flex gap-4"
                whileHover={{ scale: 1.05 }}
                whileTap={{ scale: 0.95 }}
             >
+              <Button 
+                onClick={() => navigate('/profile')} 
+                variant="outline"
+                className="rounded-2xl shadow-xl h-16 px-8 border-zinc-200 dark:border-zinc-800 font-black uppercase tracking-widest text-xs"
+              >
+                My Vouchers <UserIcon className="w-4 h-4 ml-2" />
+              </Button>
               <Button 
                 onClick={() => navigate('/login')} 
                 className="rounded-2xl shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all h-16 px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-widest text-xs border-none"

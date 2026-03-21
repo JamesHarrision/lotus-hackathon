@@ -64,17 +64,34 @@ export class RoutingService {
       
       const { recommended_branch_id, estimated_wait_time, cost } = aiResponse.data;
 
-      // 4. Check for applicable incentive if branch is changed AND distance is significant (> 3km)
+      // 4. Check for applicable incentive based on strict distance criteria
       let incentiveGiven = null;
       if (parseInt(recommended_branch_id) !== (currentBranchId || branches[0].id)) {
-        const currentBranch = branches.find(b => b.id === (currentBranchId || branches[0].id));
         const recBranch = branches.find(b => b.id === parseInt(recommended_branch_id));
+        const currentBranch = branches.find(b => b.id === (currentBranchId || branches[0].id));
         
-        if (currentBranch && recBranch) {
-          const distCurr = Math.sqrt(Math.pow(currentBranch.lat - userLat, 2) + Math.pow(currentBranch.lng - userLng, 2)) * 111.32; // Approx km
-          const distRec = Math.sqrt(Math.pow(recBranch.lat - userLat, 2) + Math.pow(recBranch.lng - userLng, 2)) * 111.32;
+        if (recBranch && currentBranch) {
+          // Hàm tính khoảng cách xấp xỉ (km)
+          const getDistKm = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+            return Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lng1 - lng2, 2)) * 111.32;
+          };
+
+          const distOldToNew = getDistKm(currentBranch.lat, currentBranch.lng, recBranch.lat, recBranch.lng);
+          const distUserToNew = getDistKm(userLat, userLng, recBranch.lat, recBranch.lng);
+          const distUserToOld = getDistKm(userLat, userLng, currentBranch.lat, currentBranch.lng);
+
+          // Chống Spam: Kiểm tra xem user đã nhận voucher nào trong 24h qua chưa
+          const last24h = new Date();
+          last24h.setHours(last24h.getHours() - 24);
           
-          if (distRec - distCurr >= 3) {
+          const recentVoucher = await this.routingRepository.findAllByUserId(userId);
+          const hasVoucherIn24h = recentVoucher.some(r => r.incentiveGiven && r.createdAt > last24h);
+
+          // Điều kiện cấp Voucher cực kỳ khắt khe:
+          // 1. Khoảng cách từ chi nhánh cũ sang chi nhánh mới > 10km
+          // 2. Người dùng phải đi xa thêm > 10km so với chi nhánh cũ
+          // 3. Chưa nhận voucher nào trong vòng 24h qua
+          if (distOldToNew > 10 && (distUserToNew - distUserToOld) > 10 && !hasVoucherIn24h) {
             const incentives = await this.incentiveRepository.findAll(enterpriseId);
             if (incentives.length > 0) {
               incentiveGiven = incentives[0].code;

@@ -51,6 +51,10 @@ export class RoutingRepository {
   async findAllByUserId(userId: number): Promise<RoutingHistory[]> {
     return prisma.routingHistory.findMany({
       where: { userId },
+      include: {
+        fromBranch: { select: { name: true } },
+        toBranch: { select: { name: true } },
+      },
       orderBy: { createdAt: 'desc' },
     });
   }

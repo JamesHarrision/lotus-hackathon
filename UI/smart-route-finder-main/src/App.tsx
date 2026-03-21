@@ -16,6 +16,7 @@ import { useSocketIntegration } from "./hooks/useSocketIntegration";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
+import Profile from "./pages/Profile";
 import EnterpriseDetails from "./pages/EnterpriseDetails";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -62,6 +63,7 @@ const AppContent = () => {
               <Home />
             </motion.div>
           } />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/enterprise/:id" element={<EnterpriseDetails />} />
         </Route>
         

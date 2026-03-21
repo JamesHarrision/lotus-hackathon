@@ -1,234 +1,110 @@
 // prisma/seed.ts
 import { PrismaClient, Role } from '@prisma/client';
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Bắt đầu seed dữ liệu...');
+  console.log('🧹 Đang dọn dẹp Database cũ...');
+  await prisma.branchLoadLog.deleteMany();
+  await prisma.routingHistory.deleteMany();
+  await prisma.incentive.deleteMany();
+  await prisma.branch.deleteMany();
+  await prisma.enterprise.deleteMany();
+  await prisma.user.deleteMany();
 
-  const commonPassword = await bcrypt.hash('hackathon123', 10);
+  console.log('🚀 Bắt đầu tạo bộ dữ liệu "Vàng" cho Demo Hackathon...');
+
+  const password = await bcrypt.hash('hackathon123', 10);
 
   // 1. Tạo SuperAdmin
-  const superAdmin = await prisma.user.upsert({
-    where: { email: 'admin@smartqueue.com' },
-    update: { password: commonPassword },
-    create: {
+  await prisma.user.create({
+    data: {
       email: 'admin@smartqueue.com',
-      password: commonPassword,
-      name: 'Super Admin Tổng',
-      phone: '0848489039',
+      password,
+      name: 'Super Admin',
       role: Role.SUPERADMIN,
     },
   });
-  console.log('Đã tạo SuperAdmin: admin@smartqueue.com / hackathon123');
 
-  // 2. Tạo một User (Khách hàng)
-  const regularUser = await prisma.user.upsert({
-    where: { email: 'user@gmail.com' },
-    update: { password: commonPassword },
-    create: {
-      email: 'user@gmail.com',
-      password: commonPassword,
-      name: 'Nguyễn Văn Khách',
-      phone: '0909123456',
-      role: Role.USER,
-    },
-  });
-  console.log('Đã tạo User: user@gmail.com / hackathon123');
-
-  // 3. Tạo một Enterprise (Doanh nghiệp - Highlands Coffee)
-  const highlandsUser = await prisma.user.upsert({
-    where: { email: 'highlands@enterprise.com' },
-    update: { password: commonPassword },
-    create: {
-      email: 'highlands@enterprise.com',
-      password: commonPassword,
-      name: 'Highlands Coffee Admin',
-      phone: '19001755',
+  // 2. Tạo Doanh nghiệp: Highlands Coffee (Chuỗi lớn nhất để demo)
+  const highlandsUser = await prisma.user.create({
+    data: {
+      email: 'highlands@demo.com',
+      password,
+      name: 'Highlands Admin',
       role: Role.ENTERPRISE,
     },
   });
 
-  const highlandsEnt = await prisma.enterprise.upsert({
-    where: { userId: highlandsUser.id },
-    update: {},
-    create: {
+  const highlandsEnt = await prisma.enterprise.create({
+    data: {
       name: 'Highlands Coffee',
       userId: highlandsUser.id,
     },
   });
-  console.log('Đã tạo Enterprise: highlands@enterprise.com / hackathon123');
 
-  // 4. Tạo các Branch cho Highlands (Địa chỉ thật tại HCM)
-  // Xóa dữ liệu liên quan trước khi xóa branch
-  const highlandsBranches = await prisma.branch.findMany({ where: { enterpriseId: highlandsEnt.id } });
-  const highlandsBranchIds = highlandsBranches.map(b => b.id);
-  await prisma.branchLoadLog.deleteMany({ where: { branchId: { in: highlandsBranchIds } } });
-  await prisma.routingHistory.deleteMany({ where: { OR: [{ fromBranchId: { in: highlandsBranchIds } }, { toBranchId: { in: highlandsBranchIds } }] } });
-  await prisma.branch.deleteMany({ where: { enterpriseId: highlandsEnt.id } });
+  // Tạo Incentive cho Highlands
+  await prisma.incentive.createMany({
+    data: [
+      { enterpriseId: highlandsEnt.id, code: 'HIGHLANDS2K', description: 'Giảm 2k khi chuyển vùng xa', discountVal: 2000, isPercentage: false },
+      { enterpriseId: highlandsEnt.id, code: 'HIGHLANDS5K', description: 'Tặng 5k khi hỗ trợ điều phối tải', discountVal: 5000, isPercentage: false },
+    ]
+  });
 
-  const branches = [
-    {
-      name: 'Highlands Coffee Landmark 81',
-      address: 'Vinhomes Central Park, Bình Thạnh, TP. HCM',
-      lat: 10.7951,
-      lng: 106.7218,
-      maxCapacity: 60,
-      cameraUrl: 'https://stream.smartqueue.com/highlands-l81',
+  // Tạo các chi nhánh Highlands tại Quận 1, Quận 3, Bình Thạnh (Gần nhau để dễ demo reroute)
+  const highlandsBranches = [
+    { 
+      name: 'Highlands Landmark 81', 
+      address: 'Vinhomes Central Park, Bình Thạnh', 
+      lat: 10.7951, 
+      lng: 106.7218, 
+      maxCapacity: 100,
+      cameraUrl: 'http://192.168.1.10:8080/video' // THAY ĐỔI: Địa chỉ IP Camera điện thoại của bạn
     },
-    {
-      name: 'Highlands Coffee Bitexco',
-      address: '2 Hải Triều, Bến Nghé, Quận 1, TP. HCM',
-      lat: 10.7718,
-      lng: 106.7044,
-      maxCapacity: 40,
-      cameraUrl: 'https://stream.smartqueue.com/highlands-bitexco',
-    },
-    {
-      name: 'Highlands Coffee Diamond Plaza',
-      address: '34 Lê Duẩn, Bến Nghé, Quận 1, TP. HCM',
-      lat: 10.7811,
-      lng: 106.6997,
-      maxCapacity: 50,
-      cameraUrl: 'https://stream.smartqueue.com/highlands-diamond',
-    },
-    {
-      name: 'Highlands Coffee Phan Xích Long',
-      address: '190 Phan Xích Long, Phú Nhuận, TP. HCM',
-      lat: 10.7963,
-      lng: 106.6852,
-      maxCapacity: 35,
-      cameraUrl: 'https://stream.smartqueue.com/highlands-pxl',
-    },
+    { name: 'Highlands Bitexco', address: 'Số 2 Hải Triều, Quận 1', lat: 10.7718, lng: 106.7044, maxCapacity: 80, cameraUrl: 'https://demo-stream.smartqueue.vn/bitexco' },
+    { name: 'Highlands Diamond Plaza', address: '34 Lê Duẩn, Quận 1', lat: 10.7811, lng: 106.6997, maxCapacity: 60, cameraUrl: 'https://demo-stream.smartqueue.vn/diamond' },
+    { name: 'Highlands Mạc Đĩnh Chi', address: '39 Mạc Đĩnh Chi, Quận 1', lat: 10.7842, lng: 106.6985, maxCapacity: 50, cameraUrl: 'https://demo-stream.smartqueue.vn/macdinhchi' },
   ];
 
-  for (const b of branches) {
-    await prisma.branch.create({
-      data: {
-        ...b,
-        enterpriseId: highlandsEnt.id,
-        currentLoad: Math.floor(Math.random() * b.maxCapacity),
-      },
+  for (const b of highlandsBranches) {
+    const branch = await prisma.branch.create({
+      data: { ...b, enterpriseId: highlandsEnt.id, currentLoad: Math.floor(Math.random() * 40) }
     });
-  }
-  console.log(`Đã tạo ${branches.length} chi nhánh cho Highlands Coffee.`);
 
-  // 5. Tạo thêm Phê La Enterprise
-  const pheLaUser = await prisma.user.upsert({
-    where: { email: 'phela@enterprise.com' },
-    update: { password: commonPassword },
-    create: {
-      email: 'phela@enterprise.com',
-      password: commonPassword,
-      name: 'Phê La Admin',
-      phone: '19003013',
-      role: Role.ENTERPRISE,
-    },
-  });
-
-  const pheLaEnt = await prisma.enterprise.upsert({
-    where: { userId: pheLaUser.id },
-    update: {},
-    create: {
-      name: 'Phê La',
-      userId: pheLaUser.id,
-    },
-  });
-
-  const pheLaOldBranches = await prisma.branch.findMany({ where: { enterpriseId: pheLaEnt.id } });
-  const pheLaBranchIds = pheLaOldBranches.map(b => b.id);
-  await prisma.branchLoadLog.deleteMany({ where: { branchId: { in: pheLaBranchIds } } });
-  await prisma.routingHistory.deleteMany({ where: { OR: [{ fromBranchId: { in: pheLaBranchIds } }, { toBranchId: { in: pheLaBranchIds } }] } });
-  await prisma.branch.deleteMany({ where: { enterpriseId: pheLaEnt.id } });
-
-  const pheLaBranches = [
-    {
-      name: 'Phê La Lý Tự Trọng',
-      address: '65 Lý Tự Trọng, Quận 1, TP. HCM',
-      lat: 10.7766,
-      lng: 106.7001,
-      maxCapacity: 30,
-      cameraUrl: 'https://stream.smartqueue.com/phela-ltt',
-    },
-    {
-      name: 'Phê La Hồ Tùng Mậu',
-      address: '125 Hồ Tùng Mậu, Quận 1, TP. HCM',
-      lat: 10.7725,
-      lng: 106.7038,
-      maxCapacity: 25,
-      cameraUrl: 'https://stream.smartqueue.com/phela-htm',
-    },
-  ];
-
-  for (const b of pheLaBranches) {
-    await prisma.branch.create({
-      data: {
-        ...b,
-        enterpriseId: pheLaEnt.id,
-        currentLoad: Math.floor(Math.random() * b.maxCapacity),
-      },
-    });
-  }
-  console.log(`Đã tạo ${pheLaBranches.length} chi nhánh cho Phê La.`);
-
-  // 6. Tạo Incentive mẫu
-  await prisma.incentive.upsert({
-    where: { code: 'HIGHLANDS50' },
-    update: {},
-    create: {
-      code: 'HIGHLANDS50',
-      description: 'Giảm 50% khi di chuyển sang chi nhánh vắng hơn',
-      discountVal: 50,
-      isPercentage: true,
-      enterpriseId: highlandsEnt.id
-    }
-  });
-
-  await prisma.incentive.upsert({
-    where: { code: 'PHELA20' },
-    update: {},
-    create: {
-      code: 'PHELA20',
-      description: 'Tặng voucher 20k khi đổi chi nhánh',
-      discountVal: 20000,
-      isPercentage: false,
-      enterpriseId: pheLaEnt.id
-    }
-  });
-  console.log('Đã tạo Incentive mẫu.');
-
-  // 7. Tạo Load History giả lập cho 24h qua
-  console.log('Đang tạo lịch sử tải giả lập...');
-  const allBranches = await prisma.branch.findMany();
-  for (const branch of allBranches) {
+    // Tạo lịch sử tải 24h qua cho đẹp biểu đồ
     for (let i = 0; i < 24; i++) {
-      const timestamp = new Date();
-      timestamp.setHours(timestamp.getHours() - i);
+      const ts = new Date();
+      ts.setHours(ts.getHours() - i);
       await prisma.branchLoadLog.create({
         data: {
           branchId: branch.id,
-          currentLoad: Math.floor(Math.random() * branch.maxCapacity),
-          timestamp: timestamp
+          currentLoad: Math.floor(Math.random() * b.maxCapacity),
+          timestamp: ts
         }
       });
     }
   }
 
-  console.log('\nSeed dữ liệu hoàn tất! Thông tin tài khoản test:');
+  // 3. Tạo User khách hàng mẫu
+  await prisma.user.create({
+    data: {
+      email: 'user@demo.com',
+      password,
+      name: 'Nguyễn Văn Khách',
+      role: Role.USER,
+    },
+  });
+
+  console.log('\n✅ Dữ liệu "Vàng" đã sẵn sàng!');
   console.log('--------------------------------------------------');
-  console.log('1. SuperAdmin: admin@smartqueue.com / hackathon123');
-  console.log('2. User:       user@gmail.com / hackathon123');
-  console.log('3. Enterprise: highlands@enterprise.com / hackathon123');
-  console.log('4. Enterprise: phela@enterprise.com / hackathon123');
+  console.log('Tài khoản test (Pass: hackathon123):');
+  console.log('1. Admin: admin@smartqueue.com');
+  console.log('2. Enterprise: highlands@demo.com');
+  console.log('3. User: user@demo.com');
   console.log('--------------------------------------------------');
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .catch((e) => { console.error(e); process.exit(1); })
+  .finally(async () => { await prisma.$disconnect(); });
