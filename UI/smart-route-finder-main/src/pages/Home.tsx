@@ -121,18 +121,18 @@ const Home = () => {
                     {/* Pulsing indicator for beauty */}
                     <div className="absolute top-8 right-8 w-2 h-2 rounded-full bg-emerald-500 group-hover:scale-150 transition-transform shadow-lg shadow-emerald-500/50" />
                     
-                    <CardHeader className="p-10 pb-4">
-                      <div className="mb-8">
-                        <div className="h-20 w-20 rounded-3xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:rotate-12 transition-transform duration-500 shadow-inner group-hover:bg-indigo-600 group-hover:text-white">
-                          <Building2 className="h-10 w-10" />
+                    <CardHeader className="p-0 border-b border-zinc-100 dark:border-zinc-800 relative z-10 overflow-hidden h-48 rounded-t-[2.5rem]">
+                      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=800&q=80')] bg-cover bg-center opacity-80 group-hover:scale-110 transition-transform duration-700" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-zinc-900/40 to-transparent" />
+                      
+                      <div className="absolute bottom-6 left-8 right-8 space-y-2">
+                        <CardTitle className="text-3xl font-black text-white tracking-tighter leading-none uppercase">
+                          {ent.name}
+                        </CardTitle>
+                        <div className="flex items-center text-[10px] font-black tracking-widest uppercase gap-2 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg w-fit text-zinc-100 border border-white/20">
+                          <MapPin className="h-3 w-3 text-emerald-400" />
+                          {ent._count?.branches || 0} Nodes Live
                         </div>
-                      </div>
-                      <CardTitle className="text-3xl font-black group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors tracking-tighter leading-none mb-4 uppercase">
-                        {ent.name}
-                      </CardTitle>
-                      <div className="flex items-center text-[10px] font-black text-zinc-400 tracking-widest uppercase gap-2 bg-zinc-50 dark:bg-zinc-950 px-4 py-2 rounded-xl w-fit border border-zinc-100 dark:border-zinc-800">
-                        <MapPin className="h-3.5 w-3.5 text-indigo-500" />
-                        {ent._count?.branches || 0} Nodes Live
                       </div>
                     </CardHeader>
                     

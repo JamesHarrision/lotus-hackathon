@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import ThemeToggle from "./components/ThemeToggle";
+import { ContactBox } from "./components/ContactBox";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +20,7 @@ import EnterpriseDetails from "./pages/EnterpriseDetails";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
 import Branches from "./pages/admin/Branches";
+import Incentives from "./pages/admin/Incentives";
 import Analytics from "./pages/admin/Analytics";
 import SuperAdminLayout from "./layouts/SuperAdminLayout";
 import SuperAdminDashboard from "./pages/superadmin/Dashboard";
@@ -67,6 +70,7 @@ const AppContent = () => {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="branches" element={<Branches />} />
+            <Route path="incentives" element={<Incentives />} />
             <Route path="analytics" element={<Analytics />} />
           </Route>
         </Route>
@@ -94,6 +98,10 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <div className="fixed top-4 right-4 z-[100] bg-white/10 backdrop-blur-md rounded-full border border-white/20 shadow-lg">
+            <ThemeToggle />
+          </div>
+          <ContactBox onOpenAIChat={() => console.log("Open AI Chat")} />
           <BrowserRouter>
             <AppContent />
           </BrowserRouter>

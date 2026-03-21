@@ -1,7 +1,7 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import { useAppStore } from "../store/useAppStore";
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard, Settings, MapPin, Home } from "lucide-react";
+import { LogOut, LayoutDashboard, Settings, MapPin, Home, Tag } from "lucide-react";
 
 const AdminLayout = () => {
   const { user, logout } = useAppStore();
@@ -29,6 +29,10 @@ const AdminLayout = () => {
           <Button variant="ghost" className="w-full justify-start text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50" onClick={() => navigate("/admin/branches")}>
             <MapPin className="mr-2 h-4 w-4" />
             Branches
+          </Button>
+          <Button variant="ghost" className="w-full justify-start text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50" onClick={() => navigate("/admin/incentives")}>
+            <Tag className="mr-2 h-4 w-4" />
+            Incentives
           </Button>
           <Button variant="ghost" className="w-full justify-start text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50" onClick={() => navigate("/admin/analytics")}>
             <Settings className="mr-2 h-4 w-4" />
@@ -60,6 +64,7 @@ const AdminLayout = () => {
             <div className="flex gap-2 overflow-x-auto pb-2 noscrollbar">
               <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="whitespace-nowrap rounded-full">Dashboard</Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/admin/branches")} className="whitespace-nowrap rounded-full">Branches</Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/admin/incentives")} className="whitespace-nowrap rounded-full">Incentives</Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/admin/analytics")} className="whitespace-nowrap rounded-full">Analytics</Button>
             </div>
         </div>

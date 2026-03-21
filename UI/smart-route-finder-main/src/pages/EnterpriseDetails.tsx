@@ -9,8 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Clock, Users, Navigation, Zap, Target } from "lucide-react";
 import { useDemoSimulation } from "../hooks/useDemoSimulation";
-import { motion, AnimatePresence } from "framer-motion";
 import { CardSkeleton } from "@/components/SkeletonLoader";
+import { useToast } from "@/components/ui/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Gift, MapPin as MapPinIcon, CheckCircle2, Activity, BrainCircuit, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Fix leaflet default icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -59,16 +62,30 @@ const EnterpriseDetails = () => {
   const [enterpriseName, setEnterpriseName] = useState("");
   const [userLoc, setUserLoc] = useState<{lat: number, lng: number} | null>(null);
   const [loading, setLoading] = useState(true);
-  const { branches: liveBranches, updateBranchLoad } = useAppStore();
+  const { branches: liveBranches, updateBranchLoad, user: authUser } = useAppStore();
+  const [recommendation, setRecommendation] = useState<any>(null);
+  const [isRecommendLoading, setIsRecommendLoading] = useState(false);
+  const { toast } = useToast();
 
-  useDemoSimulation(true);
+  // useDemoSimulation(true);
 
   useEffect(() => {
+    const DEFAULT_LOC = { lat: 21.0285, lng: 105.8542 }; // Hanoi Center
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setUserLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        (err) => console.warn("Geolocation denied", err)
+        (err) => {
+          console.warn("Geolocation denied, using default fallback.", err);
+          setUserLoc(DEFAULT_LOC);
+          toast({ 
+            title: "Simulated Location", 
+            description: "Using default coordinates (Hanoi) as GPS access was restricted.",
+          });
+        }
       );
+    } else {
+      setUserLoc(DEFAULT_LOC);
     }
 
     const fetchDetails = async () => {
@@ -130,12 +147,86 @@ const EnterpriseDetails = () => {
     return (da * 0.7 + la * 10) - (db * 0.7 + lb * 10);
   });
 
+  const handleRecommend = async (branchId: number) => {
+    console.log("handleRecommend triggered for branch:", branchId);
+    if (!userLoc) {
+      console.warn("User location missing!");
+      toast({ title: "Location Required", description: "Please enable geolocation to use smart routing.", variant: "destructive" });
+      return;
+    }
+
+    try {
+      setIsRecommendLoading(true);
+      const { data: res } = await apiClient.post("/routings/recommend", {
+        userId: authUser?.id || 1,
+        enterpriseId: parseInt(id!),
+        lat: userLoc.lat,
+        lng: userLoc.lng,
+        currentBranchId: branchId
+      });
+
+      console.log("Recommend response:", res);
+      setRecommendation(res.data);
+      toast({ title: "AI Route Ready", description: "Neural engine has generated an optimal path." });
+    } catch (err: any) {
+      console.error("Recommend error:", err);
+      toast({ 
+        title: "Routing Error", 
+        description: err.response?.data?.message || "AI Service unreachable.", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsRecommendLoading(false);
+    }
+  };
+
+  const handleUpdateRoutingStatus = async (routingId: number, status: 'ACCEPTED' | 'REJECTED') => {
+    try {
+      await apiClient.patch(`/routings/${routingId}/status`, { status });
+      setRecommendation(null);
+      toast({ 
+        title: status === 'ACCEPTED' ? "Directive Accepted" : "Route Declined", 
+        description: status === 'ACCEPTED' ? "Your choice has been synchronized with the AI engine." : "Proceeding with original choice.",
+      });
+    } catch (err: any) {
+      console.error("Update status error:", err);
+      toast({ 
+        title: "Sync Error", 
+        description: "Failed to update choice status.", 
+        variant: "destructive" 
+      });
+    }
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="flex flex-col h-screen bg-zinc-50 dark:bg-zinc-950 font-sans"
     >
+      <AnimatePresence>
+        {isRecommendLoading && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center flex-col gap-6"
+          >
+             <div className="relative">
+                <div className="absolute inset-0 bg-indigo-500 rounded-full blur-3xl animate-pulse opacity-20" />
+                <Loader2 className="w-16 h-16 text-indigo-500 animate-spin relative z-10" />
+             </div>
+             <div className="text-center">
+                <p className="text-xl font-black text-white uppercase tracking-tighter mb-2">Calculating Optimal Route</p>
+                <div className="flex items-center gap-2 justify-center">
+                   <div className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce [animation-delay:-0.3s]" />
+                   <div className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce [animation-delay:-0.15s]" />
+                   <div className="w-2 h-2 rounded-full bg-indigo-500 animate-bounce" />
+                </div>
+             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Header */}
       <motion.div 
@@ -218,7 +309,7 @@ const EnterpriseDetails = () => {
         <div className="w-full md:w-[40%] lg:w-[35%] h-[55vh] md:h-full overflow-y-auto bg-white dark:bg-zinc-900 border-l border-zinc-200/50 dark:border-zinc-800/50 custom-scrollbar relative">
           
           <div className="sticky top-0 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-2xl p-8 z-20 border-b border-zinc-100 dark:border-zinc-800">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-4">
                <h2 className="font-black text-2xl tracking-tighter flex items-center gap-3 uppercase">
                  <Target className="w-6 h-6 text-indigo-600" />
                  Smart Directives
@@ -227,7 +318,25 @@ const EnterpriseDetails = () => {
                  AI Optimized
                </div>
             </div>
-            <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Calculated by Neural Latency & Load</p>
+            
+            <Button 
+               onClick={() => handleRecommend(sortedBranches[0]?.id)}
+               disabled={isRecommendLoading || sortedBranches.length === 0}
+               className="w-full h-16 rounded-[1.5rem] bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 hover:scale-[1.02] transition-all shadow-xl shadow-indigo-500/20 border-none group relative overflow-hidden"
+            >
+               <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+               <div className="flex items-center gap-3 relative z-10">
+                  <BrainCircuit className="w-6 h-6 animate-bounce" />
+                  <div className="flex flex-col items-start leading-none">
+                     <span className="text-[10px] font-black uppercase tracking-widest text-indigo-100 mb-1">Neural Recommendation</span>
+                     <span className="text-sm font-black uppercase tracking-tighter">Auto-Intelligence Mode</span>
+                  </div>
+               </div>
+            </Button>
+            
+            <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest mt-4 flex items-center gap-2">
+              <Clock className="w-3 h-3" /> Predictive latency & load analysis active
+            </p>
           </div>
 
           <div className="p-6 space-y-6 pb-24">
@@ -300,11 +409,14 @@ const EnterpriseDetails = () => {
                       {/* Micro interaction link */}
                       <motion.div 
                         whileHover={{ scale: 1.02 }}
-                        className="mt-6 flex items-center justify-between group/link cursor-pointer"
+                        onClick={() => handleRecommend(branch.id)}
+                        className={`mt-6 flex items-center justify-between group/link cursor-pointer p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-800 hover:bg-indigo-600 transition-all duration-300 ${isRecommendLoading ? 'opacity-50 pointer-events-none' : ''}`}
                       >
-                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 group-hover/link:text-indigo-600 transition-colors">Generate Dynamic Route</span>
-                         <div className="p-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800 group-hover/link:bg-indigo-600 group-hover/link:text-white transition-all duration-300">
-                           <Navigation className="w-5 h-5" />
+                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 group-hover/link:text-white transition-colors">
+                           {isRecommendLoading ? 'Calculating...' : 'Generate AI Route'}
+                         </span>
+                         <div className="p-2 rounded-xl bg-white dark:bg-zinc-700 group-hover/link:bg-indigo-500 group-hover/link:text-white transition-all duration-300">
+                           <Navigation className="w-4 h-4" />
                          </div>
                       </motion.div>
                     </CardContent>
@@ -315,6 +427,100 @@ const EnterpriseDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Recommendation Modal */}
+      <Dialog open={!!recommendation} onOpenChange={() => setRecommendation(null)}>
+        <DialogContent className="max-w-md rounded-[2.5rem] p-0 overflow-hidden border-none bg-zinc-950 text-white shadow-2xl">
+           <div className="relative p-8">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500" />
+              
+              <div className="flex items-center gap-4 mb-8">
+                 <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+                    <Zap className="w-6 h-6 fill-indigo-400" />
+                 </div>
+                 <div>
+                    <h2 className="text-xl font-black uppercase tracking-tighter">AI Directive Ready</h2>
+                    <p className="text-[10px] font-black text-indigo-400 tracking-widest uppercase">Optimized Latency Path</p>
+                 </div>
+              </div>
+
+              <div className="space-y-6">
+                 <div className="flex items-center gap-6 relative">
+                    <div className="flex flex-col items-center gap-1 z-10">
+                       <MapPinIcon className="w-5 h-5 text-indigo-500" />
+                       <div className="w-0.5 h-12 border-l-2 border-dashed border-zinc-800" />
+                       <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                    </div>
+                    <div className="flex-1 space-y-8">
+                       <div>
+                          <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Departure Point</p>
+                          <p className="font-bold text-sm tracking-tight">{recommendation?.fromBranch?.name || 'Current Location'}</p>
+                       </div>
+                       <div>
+                          <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Target Destination</p>
+                          <p className="font-bold text-lg tracking-tight text-emerald-400 uppercase">{recommendation?.toBranch?.name}</p>
+                       </div>
+                    </div>
+                 </div>
+
+                 <div className="grid grid-cols-2 gap-4 mt-8">
+                    <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-inner">
+                       <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2">Est. Queue Time</p>
+                       <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-amber-500" />
+                          <span className="text-xl font-black tracking-tighter">{recommendation?.estimatedWaitTime || '0'}m</span>
+                       </div>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-inner">
+                       <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2">Algorithmic Cost</p>
+                       <div className="flex items-center gap-2">
+                          <Activity className="w-4 h-4 text-indigo-500" />
+                          <span className="text-xl font-black tracking-tighter">{recommendation?.calculatedCost?.toFixed(2) || '0.00'}</span>
+                       </div>
+                    </div>
+                 </div>
+
+                 {recommendation?.incentiveGiven && (
+                    <motion.div 
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="mt-6 p-6 rounded-[2rem] bg-gradient-to-br from-indigo-600 to-purple-600 shadow-xl shadow-indigo-600/30 relative overflow-hidden"
+                    >
+                       <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl" />
+                       <div className="flex items-center gap-4 relative z-10">
+                          <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center">
+                             <Gift className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                             <p className="text-[10px] font-black text-indigo-100 uppercase tracking-widest">Reward Unlocked</p>
+                             <div className="text-2xl font-black text-white tracking-tighter uppercase">{recommendation?.incentiveGiven}</div>
+                          </div>
+                       </div>
+                       <p className="text-[10px] text-indigo-100 mt-4 font-bold italic opacity-80 uppercase tracking-wider">
+                         * Show this code at {recommendation?.toBranch?.name} to redeem your load-balancing reward.
+                       </p>
+                    </motion.div>
+                 )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mt-10">
+                <Button 
+                  onClick={() => handleUpdateRoutingStatus(recommendation.id, 'REJECTED')}
+                  variant="outline"
+                  className="h-14 rounded-2xl border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-900 font-black uppercase tracking-widest text-[10px]"
+                >
+                  Reject & Go Anyway
+                </Button>
+                <Button 
+                  onClick={() => handleUpdateRoutingStatus(recommendation.id, 'ACCEPTED')}
+                  className="h-14 rounded-2xl bg-indigo-600 text-white hover:bg-indigo-500 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-indigo-600/20"
+                >
+                  Accept Directive
+                </Button>
+              </div>
+           </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };

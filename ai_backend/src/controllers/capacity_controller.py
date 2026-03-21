@@ -32,15 +32,20 @@ def calculate_routes(request: Dict):
     matrix_map = {m["branch_id"]: m for m in user_to_branches_data}
     
     branch_options = []
-    current_branch = None
+    current_branch = next((b for b in branches if b.branch_id == current_branch_id), None)
     
     for branch in branches:
         matrix = matrix_map.get(branch.branch_id, {"distance_km": 5.0, "travel_time_minutes": 15.0})
         
-        # Incentive logic: Offer incentive if it's NOT the current branch and it has lower load
+        # Incentive logic: Only offer incentive if it's better for load balancing
         incentive = 0.0
-        if branch.branch_id != current_branch_id:
-            incentive = 20.0 # Standard incentive for rerouting
+        if current_branch and branch.branch_id != current_branch_id:
+            current_load = current_branch.current_capacity / max(1, current_branch.max_capacity)
+            target_load = branch.current_capacity / max(1, branch.max_capacity)
+            
+            # Offer incentive if current branch is >60% full AND alternative is >20% less crowded
+            if current_load > 0.6 and target_load < current_load - 0.2:
+                incentive = 20.0 # Standard incentive for rerouting
             
         option = BranchOption(
             branch=branch,
@@ -49,9 +54,6 @@ def calculate_routes(request: Dict):
             incentive_offered=incentive
         )
         branch_options.append(option)
-        
-        if branch.branch_id == current_branch_id:
-            current_branch = branch
 
     # 3. Execute the Math Core
     results = routing_service.calculate_multinomial_logit_probabilities(

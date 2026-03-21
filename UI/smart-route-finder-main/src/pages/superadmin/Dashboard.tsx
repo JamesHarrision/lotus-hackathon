@@ -17,52 +17,18 @@ import {
   Area
 } from "recharts";
 
-const systemData = [
-  { name: "00:00", active: 120, load: 15 },
-  { name: "04:00", active: 45, load: 5 },
-  { name: "08:00", active: 280, load: 35 },
-  { name: "12:00", active: 850, load: 92 },
-  { name: "16:00", active: 720, load: 78 },
-  { name: "20:00", active: 450, load: 40 },
-  { name: "23:59", active: 180, load: 20 },
-];
-
-const COLORS = ["#8b5cf6", "#6366f1", "#3b82f6"];
+const COLORS = ["#8b5cf6", "#6366f1", "#3b82f6", "#10b981", "#f59e0b"];
 
 const SuperAdminDashboard = () => {
-  const [stats, setStats] = useState({ users: 0, enterprises: 0, branches: 0 });
-  const [roleDistribution, setRoleDistribution] = useState([
-    { name: "Standard Users", value: 0 },
-    { name: "Enterprise Admins", value: 0 },
-    { name: "System Admins", value: 0 },
-  ]);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchGlobalStats = async () => {
       try {
-        const [usersReq, entReq, branchesReq] = await Promise.all([
-          apiClient.get("/users").catch(() => ({ data: { data: [] } })),
-          apiClient.get("/enterprises").catch(() => ({ data: { data: [] } })),
-          apiClient.get("/branches").catch(() => ({ data: { data: [] } }))
-        ]);
-
-        const allUsers = usersReq.data?.data || [];
-        const userCount = allUsers.filter((u: any) => u.role === "USER").length;
-        const enterpriseCount = allUsers.filter((u: any) => u.role === "ENTERPRISE").length;
-        const adminCount = allUsers.filter((u: any) => u.role === "SUPERADMIN").length;
-
-        setStats({
-          users: allUsers.length,
-          enterprises: entReq.data?.data?.length || 0,
-          branches: branchesReq.data?.data?.length || 0,
-        });
-
-        setRoleDistribution([
-          { name: "Standard Users", value: userCount },
-          { name: "Enterprise Admins", value: enterpriseCount },
-          { name: "System Admins", value: adminCount },
-        ]);
+        setLoading(true);
+        const { data: res } = await apiClient.get("/superadmin/dashboard");
+        setData(res);
       } catch (error) {
         console.error("Failed to fetch super admin stats", error);
       } finally {
@@ -71,6 +37,14 @@ const SuperAdminDashboard = () => {
     };
     fetchGlobalStats();
   }, []);
+
+  const stats = data?.stats || { totalUsers: 0, totalEnterprises: 0, totalBranches: 0, totalRoutings: 0, conversionRate: 0 };
+  const traffic = data?.systemTraffic || [];
+
+  const roleDistribution = [
+    { name: "System Conversions", value: stats.conversionRate },
+    { name: "Network Load", value: 100 - stats.conversionRate },
+  ];
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -106,7 +80,7 @@ const SuperAdminDashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-black text-zinc-900 dark:text-zinc-50">{stats.users}</div>
+              <div className="text-4xl font-black text-zinc-900 dark:text-zinc-50">{stats.totalUsers}</div>
             </CardContent>
           </Card>
 
@@ -118,19 +92,19 @@ const SuperAdminDashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-black text-zinc-900 dark:text-zinc-50">{stats.enterprises}</div>
+              <div className="text-4xl font-black text-zinc-900 dark:text-zinc-50">{stats.totalEnterprises}</div>
             </CardContent>
           </Card>
 
           <Card className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border-blue-100 dark:border-blue-900/30 shadow-lg shadow-blue-500/5 hover:-translate-y-1 transition-transform duration-300">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Network Nodes (Branches)</CardTitle>
+              <CardTitle className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Network Nodes</CardTitle>
               <div className="p-2 bg-blue-500/10 rounded-lg">
                 <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-black text-zinc-900 dark:text-zinc-50">{stats.branches}</div>
+              <div className="text-4xl font-black text-zinc-900 dark:text-zinc-50">{stats.totalBranches}</div>
             </CardContent>
           </Card>
 
@@ -149,7 +123,7 @@ const SuperAdminDashboard = () => {
           </CardHeader>
           <CardContent className="h-[300px] p-6">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={systemData}>
+              <AreaChart data={traffic}>
                 <defs>
                    <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
                      <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
@@ -160,7 +134,8 @@ const SuperAdminDashboard = () => {
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#888'}} />
                 <YAxis hide />
                 <Tooltip />
-                <Area type="monotone" dataKey="active" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorCost)" />
+                <Area type="monotone" dataKey="traffic" name="Daily Avg Load" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorCost)" />
+                <Area type="monotone" dataKey="requests" name="Routing Events" stroke="#10b981" fillOpacity={0} />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -168,8 +143,8 @@ const SuperAdminDashboard = () => {
 
         <Card className="rounded-3xl border-zinc-200/50 shadow-xl bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl overflow-hidden">
           <CardHeader>
-            <CardTitle className="text-xl font-bold">Role Distribution</CardTitle>
-            <CardDescription>Breakdown of account types in the system</CardDescription>
+            <CardTitle className="text-xl font-bold text-emerald-500">Conversion Efficiency</CardTitle>
+            <CardDescription>Network-wide accepted vs rejected routing recommendations</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px] p-6 flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">

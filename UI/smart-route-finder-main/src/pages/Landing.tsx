@@ -149,7 +149,7 @@ const Landing = () => {
                <button 
                 type="submit"
                 disabled={isSearching}
-                className="absolute right-2 top-2 h-12 w-12 bg-indigo-600 rounded-xl flex items-center justify-center hover:bg-indigo-500 transition-colors disabled:opacity-50"
+                className="absolute right-2 top-2 h-12 w-12 bg-indigo-600 rounded-xl flex items-center justify-center hover:bg-indigo-500 transition-colors disabled:opacity-50 text-white"
                >
                  {isSearching ? <Sparkles className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
                </button>
@@ -356,8 +356,10 @@ const Landing = () => {
 
       {/* Enterprise Section */}
       <section id="enterprise" className="relative z-10 py-32 px-6 md:px-12 max-w-7xl mx-auto border-t border-white/5">
-        <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[3rem] p-12 md:p-24 relative overflow-hidden text-center group">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-[100px] -mr-48 -mt-48 group-hover:scale-110 transition-transform duration-1000" />
+        <div className="bg-zinc-900 rounded-[3rem] p-12 md:p-24 relative overflow-hidden text-center group border border-white/5 shadow-2xl">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=2000&q=80')] bg-cover bg-center opacity-40 mix-blend-luminosity group-hover:scale-105 transition-transform duration-1000" />
+          <div className="absolute inset-0 bg-gradient-to-t from-indigo-950/90 via-indigo-900/60 to-transparent" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] -mr-48 -mt-48" />
           <div className="relative z-10 max-w-2xl mx-auto space-y-8">
             <Building2 className="w-16 h-16 mx-auto mb-8 text-white/50" />
             <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-white">Scale Your Infrastructure.</h2>

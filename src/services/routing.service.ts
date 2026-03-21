@@ -64,13 +64,22 @@ export class RoutingService {
       
       const { recommended_branch_id, estimated_wait_time, cost } = aiResponse.data;
 
-      // 4. Check for applicable incentive if branch is changed
+      // 4. Check for applicable incentive if branch is changed AND distance is significant (> 3km)
       let incentiveGiven = null;
       if (parseInt(recommended_branch_id) !== (currentBranchId || branches[0].id)) {
-        const incentives = await this.incentiveRepository.findAll(enterpriseId);
-        if (incentives.length > 0) {
-          // Just pick the first active incentive for now
-          incentiveGiven = incentives[0].code;
+        const currentBranch = branches.find(b => b.id === (currentBranchId || branches[0].id));
+        const recBranch = branches.find(b => b.id === parseInt(recommended_branch_id));
+        
+        if (currentBranch && recBranch) {
+          const distCurr = Math.sqrt(Math.pow(currentBranch.lat - userLat, 2) + Math.pow(currentBranch.lng - userLng, 2)) * 111.32; // Approx km
+          const distRec = Math.sqrt(Math.pow(recBranch.lat - userLat, 2) + Math.pow(recBranch.lng - userLng, 2)) * 111.32;
+          
+          if (distRec - distCurr >= 3) {
+            const incentives = await this.incentiveRepository.findAll(enterpriseId);
+            if (incentives.length > 0) {
+              incentiveGiven = incentives[0].code;
+            }
+          }
         }
       }
 
