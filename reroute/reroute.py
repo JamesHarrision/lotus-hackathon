@@ -8,7 +8,6 @@ class LocationNode:
     def available_space(self) -> int:
         return self.max_capacity - self.current_capacity
 
-
 class OverflowDispatcher:
     def __init__(self, num_nodes: int):
         # Initialize lists with the correct size
