@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AIChatbot } from "@/components/AIChatbot";
+import { ContactBox } from "@/components/ContactBox";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -369,7 +370,7 @@ const Landing = () => {
                 onClick={() => setIsChatOpen(true)}
                 className="h-16 px-12 rounded-2xl bg-white text-indigo-600 hover:bg-zinc-100 font-black text-xl active:scale-95 transition-all shadow-2xl"
               >
-                Talk to Sales
+                Talk to AI
               </Button>
             </div>
           </div>
@@ -378,6 +379,9 @@ const Landing = () => {
 
       {/* AI Chatbot Overlay */}
       <AIChatbot isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+
+      {/* Floating Contact Box */}
+      <ContactBox onOpenAIChat={() => setIsChatOpen(true)} />
 
       {/* App Stats Section */}
       <section className="bg-zinc-900/30 border-y border-white/5 py-24 relative overflow-hidden">

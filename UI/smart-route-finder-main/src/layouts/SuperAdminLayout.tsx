@@ -1,7 +1,7 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import { useAppStore } from "../store/useAppStore";
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard, Building2, ScrollText, Users } from "lucide-react";
+import { LogOut, LayoutDashboard, Building2, ScrollText, Users, Home } from "lucide-react";
 
 const SuperAdminLayout = () => {
   const { user, logout } = useAppStore();
@@ -38,6 +38,10 @@ const SuperAdminLayout = () => {
         </nav>
 
         <div className="p-4 border-t border-zinc-200 dark:border-zinc-800">
+          <Button variant="ghost" className="w-full justify-start text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 font-medium transition-colors mb-2" onClick={() => navigate("/")}>
+            <Home className="mr-2 h-4 w-4" />
+            Back to Website
+          </Button>
           <Button variant="outline" className="w-full justify-start text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950 transition-colors" onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             Logout System

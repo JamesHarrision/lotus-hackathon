@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiClient } from "../lib/axios";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { MapPin, Building2, ChevronRight, LogIn, Sparkles } from "lucide-react";
+import { MapPin, Building2, ChevronRight, LogIn, Sparkles, Home as HomeIcon, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { CardSkeleton } from "@/components/SkeletonLoader";
@@ -56,6 +56,15 @@ const Home = () => {
             className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10"
           >
             <div className="space-y-6 max-w-2xl">
+              <div 
+                onClick={() => navigate("/")}
+                className="flex items-center gap-2 cursor-pointer group mb-4 w-fit"
+              >
+                <div className="p-1.5 bg-indigo-600 rounded-lg group-hover:scale-110 transition-transform shadow-lg shadow-indigo-600/20">
+                  <Zap className="w-4 h-4 fill-white" />
+                </div>
+                <span className="text-sm font-black tracking-tighter uppercase italic text-zinc-900 dark:text-zinc-50">YOGO</span>
+              </div>
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest shadow-sm">
                 <Sparkles className="w-3.5 h-3.5 fill-indigo-500/20" /> Next-Gen Smart Routing
               </div>

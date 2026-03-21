@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ChevronLeft } from "lucide-react";
 
 
 const registerSchema = z.object({
@@ -66,8 +67,16 @@ const Register = () => {
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-zinc-50 dark:bg-zinc-950 py-12 animate-in fade-in zoom-in-95 duration-500">
-      <div className="mx-auto w-full max-w-md space-y-6 rounded-2xl bg-white/70 backdrop-blur-xl p-8 shadow-2xl dark:bg-zinc-900/70 border border-zinc-100 dark:border-zinc-800 transition-all hover:shadow-primary/5">
-        <div className="space-y-2 text-center">
+      <div className="mx-auto w-full max-w-md space-y-6 rounded-2xl bg-white/70 backdrop-blur-xl p-8 shadow-2xl dark:bg-zinc-900/70 border border-zinc-100 dark:border-zinc-800 transition-all hover:shadow-primary/5 relative">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => navigate("/")}
+          className="absolute top-4 left-4 text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 gap-1 rounded-xl"
+        >
+          <ChevronLeft className="h-4 w-4" /> Back to Website
+        </Button>
+        <div className="space-y-2 text-center pt-8">
           <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Create an account</h1>
           <p className="text-zinc-500 dark:text-zinc-400">Enter your information to register</p>
         </div>
