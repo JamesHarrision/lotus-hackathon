@@ -7,6 +7,7 @@ export interface User {
   name?: string;
   phone?: string;
   role: 'SUPERADMIN' | 'ENTERPRISE' | 'USER';
+  enterpriseId?: number;
 }
 
 export interface BranchLoadData {

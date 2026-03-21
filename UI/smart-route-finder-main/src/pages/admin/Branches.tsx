@@ -58,7 +58,9 @@ const Branches = () => {
     if (!user) return;
     try {
       setLoading(true);
-      const { data } = await apiClient.get(`/branches?enterpriseId=${user.id}`);
+      const targetId = user.enterpriseId || user.id;
+      console.log("Branches Page Fetching for ID:", targetId);
+      const { data } = await apiClient.get(`/branches?enterpriseId=${targetId}`);
       setBranches(data.data || []);
     } catch (error) {
       console.error("Failed to fetch branches", error);
@@ -133,16 +135,17 @@ const Branches = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const targetId = user?.enterpriseId || user?.id;
       if (editingBranch) {
         await apiClient.put(`/branches/${editingBranch.id}`, {
           ...formData,
-          enterpriseId: user?.id
+          enterpriseId: targetId
         });
         toast({ title: "Branch updated successfully" });
       } else {
         await apiClient.post("/branches", {
           ...formData,
-          enterpriseId: user?.id
+          enterpriseId: targetId
         });
         toast({ title: "Branch created successfully" });
       }

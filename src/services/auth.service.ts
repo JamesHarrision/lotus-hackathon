@@ -38,13 +38,19 @@ export class AuthService {
       throw new Error("Invalid credentials");
     }
 
+    const { password, ...userWithoutPassword } = user;
+    const responseUser: any = { ...userWithoutPassword };
+    
+    if (user.role === 'ENTERPRISE' && (user as any).enterprise) {
+      responseUser.enterpriseId = (user as any).enterprise.id;
+    }
+
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      { id: user.id, email: user.email, role: user.role, enterpriseId: responseUser.enterpriseId },
       this.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    const { password, ...userWithoutPassword } = user;
-    return { user: userWithoutPassword, token };
+    return { user: responseUser, token };
   }
 }

@@ -71,12 +71,21 @@ const AdminDashboard = () => {
       if (!user) return;
       try {
         setLoading(true);
+        // Use enterpriseId for analytics and branches if available, fallback to user.id
+        const targetId = user.enterpriseId || user.id;
+        console.log("Dashboard Fetching for Enterprise/User ID:", targetId, "User Role:", user.role);
+
         // Fetch dashboard data (Overview)
-        const branchRes = await apiClient.get(`/branches?enterpriseId=${user.id}`);
-        setBranches(branchRes.data.data || []);
+        const branchRes = await apiClient.get(`/branches?enterpriseId=${targetId}`);
+        const branchData = branchRes.data.data || [];
+        setBranches(branchData);
+        
+        if (branchData.length === 0) {
+          console.warn("No branches found for ID:", targetId);
+        }
         
         // Seed Zustand store with initial branch data
-        branchRes.data.data.forEach((b: Branch) => {
+        branchData.forEach((b: Branch) => {
           updateBranchLoad({
             branchId: b.id,
             currentLoad: b.currentLoad,
@@ -86,11 +95,11 @@ const AdminDashboard = () => {
         });
 
         // Fetch real analytics (X-axis: time, Y-axis: load)
-        const analyticsRes = await apiClient.get(`/enterprises/${user.id}/analytics`);
+        const analyticsRes = await apiClient.get(`/enterprises/${targetId}/analytics`);
         setAnalytics(analyticsRes.data.timeSeries || []);
 
         // Fetch incentives
-        const incentiveRes = await apiClient.get(`/incentives?enterpriseId=${user.id}`);
+        const incentiveRes = await apiClient.get(`/incentives?enterpriseId=${targetId}`);
         setIncentives(incentiveRes.data.data || []);
 
       } catch (error) {
@@ -183,9 +192,9 @@ const AdminDashboard = () => {
                     </CardHeader>
                     <CardContent>
                        <div className="text-5xl font-black text-zinc-900 dark:text-zinc-50 tracking-tighter">{branches.length}</div>
-                       <p className="text-[10px] text-emerald-500 mt-3 font-black uppercase tracking-widest flex items-center gap-1.5">
+                       <div className="text-[10px] text-emerald-500 mt-3 font-black uppercase tracking-widest flex items-center gap-1.5">
                           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> Active Assets
-                       </p>
+                       </div>
                     </CardContent>
                   </Card>
                   
@@ -200,7 +209,7 @@ const AdminDashboard = () => {
                        <div className="text-5xl font-black text-zinc-900 dark:text-zinc-50 tracking-tighter">
                          {totalLoad} <span className="text-xl text-zinc-400 font-bold tracking-normal opacity-50">/ {totalCapacity}</span>
                        </div>
-                       <p className="text-[10px] text-zinc-500 mt-3 font-black uppercase tracking-widest">Aggregate Traffic Flow</p>
+                       <div className="text-[10px] text-zinc-500 mt-3 font-black uppercase tracking-widest">Aggregate Traffic Flow</div>
                     </CardContent>
                   </Card>
 
@@ -215,7 +224,7 @@ const AdminDashboard = () => {
                        <div className={`text-5xl font-black tracking-tighter ${networkLoadPct > 80 ? 'text-rose-500' : 'text-emerald-500'}`}>
                          {networkLoadPct}%
                        </div>
-                       <p className="text-[10px] text-zinc-500 mt-3 font-black uppercase tracking-widest">Network Load Density</p>
+                       <div className="text-[10px] text-zinc-500 mt-3 font-black uppercase tracking-widest">Network Load Density</div>
                     </CardContent>
                   </Card>
                 </>
@@ -336,7 +345,7 @@ const AdminDashboard = () => {
                     const loadPct = branch.maxCapacity > 0 ? (branch.currentLoad / branch.maxCapacity) * 100 : 0;
                     const isBusy = loadPct > 80;
                     return (
-                      <Card className="rounded-[2.2rem] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 overflow-hidden group hover:shadow-2xl transition-all h-full flex flex-col cursor-pointer shadow-sm">
+                      <Card key={branch.id} className="rounded-[2.2rem] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 overflow-hidden group hover:shadow-2xl transition-all h-full flex flex-col cursor-pointer shadow-sm">
                          <CardHeader className="p-8 pb-4">
                             <div className="flex justify-between items-start mb-6">
                                <div className={`p-4 rounded-2xl ${isBusy ? 'bg-rose-500/10' : 'bg-emerald-500/10'} shadow-inner`}>
@@ -348,7 +357,7 @@ const AdminDashboard = () => {
                                </div>
                             </div>
                             <CardTitle className="text-xl font-black tracking-tight line-clamp-1 uppercase group-hover:text-indigo-500 transition-colors">{branch.name}</CardTitle>
-                            <p className="text-[10px] font-black text-zinc-400 mt-2 uppercase tracking-widest line-clamp-2 leading-relaxed">{branch.address}</p>
+                            <div className="text-[10px] font-black text-zinc-400 mt-2 uppercase tracking-widest line-clamp-2 leading-relaxed">{branch.address}</div>
                          </CardHeader>
                          <CardContent className="p-8 pt-0 flex-1 flex flex-col justify-end">
                             <div className="space-y-4">
@@ -370,6 +379,17 @@ const AdminDashboard = () => {
                       </Card>
                     );
                  })}
+                 
+                 {filteredBranches.length === 0 && !loading && (
+                   <div className="col-span-full py-20 flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-900/50 rounded-[3rem] border-2 border-dashed border-zinc-200 dark:border-zinc-800">
+                      <Building className="w-12 h-12 text-zinc-300 mb-4" />
+                      <h3 className="text-xl font-black tracking-tight">No Branches Found</h3>
+                      <p className="text-zinc-500 mt-2 font-medium text-center">
+                        Try logging out and logging back in if you just seeded the database. <br/>
+                        Target ID: {user.enterpriseId || user.id} (Role: {user.role})
+                      </p>
+                   </div>
+                 )}
                </div>
             </div>
           </motion.div>
@@ -411,7 +431,7 @@ const AdminDashboard = () => {
                                <CardTitle className="text-3xl font-black tracking-tighter uppercase">{inc.code}</CardTitle>
                             </div>
                          </div>
-                         <p className="text-sm font-bold text-zinc-500 italic">"{inc.description || 'Generic load-redistribution reward node.'}"</p>
+                         <div className="text-sm font-bold text-zinc-500 italic">"{inc.description || 'Generic load-redistribution reward node.'}"</div>
                       </CardHeader>
                       <CardContent className="p-10 pt-0">
                          <div className="flex items-center justify-between p-6 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-3xl">
