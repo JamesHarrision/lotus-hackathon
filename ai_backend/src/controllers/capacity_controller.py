@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from models.schemas import RoutingRequest, RoutingResponse, Branch, BranchOption
+from typing import Dict
+from models.schemas import RoutingRequest, RoutingResponse, Branch, BranchOption, UserPreferences
 from services import routing_service
 
 router = APIRouter()
@@ -12,49 +13,75 @@ MOCK_BRANCH_DB = [
 ]
 
 @router.post("/calculate-routes", response_model=RoutingResponse)
-def calculate_routes(request: RoutingRequest):
-    # 1. Filter branches by the requested company_id
-    company_branches = [b for b in MOCK_BRANCH_DB if b.company_id == request.company_id]
-    
-    if not company_branches:
-        raise HTTPException(status_code=404, detail="No branches found for this company.")
+def calculate_routes(request: Dict):
+    # 1. Parse incoming data from Node.js
+    company_id = request.get("company_id")
+    user_prefs_data = request.get("user_prefs")
+    current_branch_id = request.get("current_branch_id")
+    branches_data = request.get("branches_data", [])
+    user_to_branches_data = request.get("user_to_branches", [])
 
-    # 2. Build the options mapping (Mocking distances and incentives for the example)
+    if not branches_data:
+        raise HTTPException(status_code=404, detail="No branches data provided.")
+
+    # 2. Build objects for the algorithm
+    branches = [Branch(**b) for b in branches_data]
+    user_prefs = UserPreferences(**user_prefs_data)
+    
+    # Map distance and travel time from user_to_branches_data
+    matrix_map = {m["branch_id"]: m for m in user_to_branches_data}
+    
     branch_options = []
     current_branch = None
     
-    
-    for branch in company_branches:
-        if branch.branch_id == request.current_branch_id:
+    for branch in branches:
+        matrix = matrix_map.get(branch.branch_id, {"distance_km": 5.0, "travel_time_minutes": 15.0})
+        
+        # Incentive logic: Offer incentive if it's NOT the current branch and it has lower load
+        incentive = 0.0
+        if branch.branch_id != current_branch_id:
+            incentive = 20.0 # Standard incentive for rerouting
+            
+        option = BranchOption(
+            branch=branch,
+            distance_to_user_km=matrix["distance_km"],
+            travel_time_minutes=matrix["travel_time_minutes"],
+            incentive_offered=incentive
+        )
+        branch_options.append(option)
+        
+        if branch.branch_id == current_branch_id:
             current_branch = branch
-            branch_options.append(BranchOption(branch=branch, distance_to_user_km=0.5, incentive_offered=0.0))
-        else:
-            # For alternatives, offer an incentive to move
-            branch_options.append(BranchOption(branch=branch, distance_to_user_km=2.5, incentive_offered=15.0))
 
-    if not current_branch:
-        raise HTTPException(status_code=404, detail="Current branch not found.")
-
-    # 3. Execute the Math Core (Softmax Probabilities)
-    probabilities = routing_service.calculate_multinomial_logit_probabilities(
-        user_prefs=request.user_prefs,
+    # 3. Execute the Math Core
+    results = routing_service.calculate_multinomial_logit_probabilities(
+        user_prefs=user_prefs,
         branch_options=branch_options
     )
     
-    # 4. Calculate how many users need notifications based on the best alternative's probability
-    # (Assuming the highest probability alternative is the one we push)
-    alt_probs = [p for b_id, p in probabilities.items() if b_id != request.current_branch_id]
-    best_alt_prob = max(alt_probs) if alt_probs else 0.01
+    # 4. Find the best recommended branch
+    best_branch_id = max(results, key=lambda x: results[x]["probability"])
+    best_result = results[best_branch_id]
     
-    pings_needed = routing_service.calculate_notifications_needed(
-        branch=current_branch,
-        threshold_percent=0.85, # Target 85% capacity
-        average_switch_prob=best_alt_prob
-    )
+    prob_map = {b_id: info["probability"] for b_id, info in results.items()}
+    
+    # 5. Calculate notifications needed for the current branch
+    best_alt_prob = max([info["probability"] for b_id, info in results.items() if b_id != current_branch_id], default=0.1)
+    
+    pings_needed = 0
+    if current_branch:
+        pings_needed = routing_service.calculate_notifications_needed(
+            branch=current_branch,
+            threshold_percent=0.8,
+            average_switch_prob=best_alt_prob
+        )
 
-    # 5. Return the payload to the frontend
+    # 6. Return response
     return RoutingResponse(
-        user_id=request.user_prefs.user_id,
-        recommendations=probabilities,
-        notifications_to_send=pings_needed
+        user_id=user_prefs.user_id,
+        recommendations=prob_map,
+        notifications_to_send=pings_needed,
+        recommended_branch_id=best_branch_id,
+        estimated_wait_time=best_result["wait_time"],
+        cost=best_result["utility"]
     )

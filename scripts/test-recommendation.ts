@@ -21,6 +21,7 @@ async function testRecommendation() {
       console.log('Routing ID:', response.data.data.id);
       console.log('Từ chi nhánh (ID):', response.data.data.fromBranchId);
       console.log('Đến chi nhánh tối ưu (ID):', response.data.data.toBranchId);
+      console.log('Thời gian chờ ước tính:', response.data.data.estimatedWaitTime, 'phút');
       console.log('Trạng thái:', response.data.data.status);
       console.log('--------------------------------------------------');
       console.log('Dữ liệu thô:', JSON.stringify(response.data.data, null, 2));

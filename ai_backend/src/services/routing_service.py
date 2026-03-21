@@ -18,12 +18,12 @@ def calculate_dynamic_expected_wait_time(
 def calculate_multinomial_logit_probabilities(
     user_prefs: UserPreferences, 
     branch_options: List[BranchOption]
-) -> Dict[str, float]:
-    """Calculates Softmax probability distribution across available branches."""
+) -> Dict[str, Dict[str, float]]:
+    """Calculates Softmax probability distribution and metrics across branches."""
     utilities = {}
+    metrics = {}
     
     for option in branch_options:
-        # Mock travel time based on distance (avg 40 km/h)
         travel_time_minutes = option.travel_time_minutes
         
         wait_time = calculate_dynamic_expected_wait_time(
@@ -32,21 +32,33 @@ def calculate_multinomial_logit_probabilities(
             travel_time_minutes=travel_time_minutes
         )
         
+        # Utility formula: U = beta_dist*Dist + beta_wait*Wait + beta_inc*Incentive
         u = (user_prefs.beta_dist * option.distance_to_user_km) + \
             (user_prefs.beta_wait * wait_time) + \
             (user_prefs.beta_inc * option.incentive_offered)
             
         utilities[option.branch.branch_id] = u
+        metrics[option.branch.branch_id] = {
+            "utility": u,
+            "wait_time": wait_time,
+            "travel_time": travel_time_minutes
+        }
 
     # Softmax with numerical stability
     max_u = max(utilities.values()) if utilities else 0
     exp_utilities = {b_id: math.exp(u - max_u) for b_id, u in utilities.items()}
     sum_exp = sum(exp_utilities.values())
     
-    if sum_exp == 0:
-        return {b_id: 0.0 for b_id in utilities.keys()}
+    results = {}
+    for b_id in utilities.keys():
+        prob = (exp_utilities[b_id] / sum_exp) if sum_exp > 0 else 0.0
+        results[b_id] = {
+            "probability": prob,
+            "wait_time": metrics[b_id]["wait_time"],
+            "utility": metrics[b_id]["utility"]
+        }
         
-    return {b_id: (exp_u / sum_exp) for b_id, exp_u in exp_utilities.items()}
+    return results
 
 def calculate_notifications_needed(
     branch: Branch, 

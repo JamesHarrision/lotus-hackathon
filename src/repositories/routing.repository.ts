@@ -15,6 +15,7 @@ export class RoutingRepository {
     status: RoutingStatus;
     incentiveGiven?: string;
     calculatedCost?: number;
+    estimatedWaitTime?: number;
   }): Promise<RoutingHistory> {
     return prisma.routingHistory.create({
       data,

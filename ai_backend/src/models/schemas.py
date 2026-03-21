@@ -19,6 +19,7 @@ class UserPreferences(BaseModel):
 class BranchOption(BaseModel):
     branch: Branch
     distance_to_user_km: float
+    travel_time_minutes: float
     incentive_offered: float
 
 class CameraStream(BaseModel):
@@ -39,3 +40,6 @@ class RoutingResponse(BaseModel):
     user_id: str
     recommendations: Dict[str, float] # {branch_id: probability}
     notifications_to_send: int
+    recommended_branch_id: str
+    estimated_wait_time: float # Minutes
+    cost: float

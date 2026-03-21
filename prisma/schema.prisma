@@ -95,6 +95,7 @@ model RoutingHistory {
   // Thông số để show cho ban giám khảo thấy hệ thống hoạt động thông minh thế nào
   incentiveGiven String? // VD: "VOUCHER_20_PERCENT"
   calculatedCost Float? // Lưu lại cost mà thuật toán Min-Cost Max-Flow tính ra để tracking/debug
+  estimatedWaitTime Float? // Thời gian chờ ước tính (phút) trả về từ AI
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

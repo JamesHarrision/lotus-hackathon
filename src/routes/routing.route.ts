@@ -42,12 +42,13 @@ router.patch("/:routingId/status", routingController.updateStatus);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [userId, enterpriseId, userLat, userLng]
+ *             required: [userId, enterpriseId, lat, lng]
  *             properties:
  *               userId: { type: integer }
  *               enterpriseId: { type: integer }
- *               userLat: { type: number }
- *               userLng: { type: number }
+ *               lat: { type: number }
+ *               lng: { type: number }
+ *               currentBranchId: { type: integer }
  *     responses:
  *       200:
  *         description: Recommendation result

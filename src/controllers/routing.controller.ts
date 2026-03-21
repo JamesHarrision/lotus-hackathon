@@ -63,7 +63,7 @@ export class RoutingController {
 
   recommend = async (req: Request, res: Response) => {
     try {
-      const { userId, enterpriseId, lat, lng } = req.body;
+      const { userId, enterpriseId, lat, lng, currentBranchId } = req.body;
 
       if (!userId || !enterpriseId || lat === undefined || lng === undefined) {
         return res.status(400).json({ 
@@ -76,7 +76,8 @@ export class RoutingController {
         userId, 
         enterpriseId, 
         lat, 
-        lng
+        lng,
+        currentBranchId
       );
 
       res.status(200).json({
