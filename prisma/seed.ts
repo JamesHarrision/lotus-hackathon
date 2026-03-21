@@ -7,29 +7,44 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Bắt đầu seed dữ liệu...');
 
+  const commonPassword = await bcrypt.hash('hackathon123', 10);
+
   // 1. Tạo SuperAdmin
-  const hashedPassword = await bcrypt.hash('hackathon123', 10);
   const superAdmin = await prisma.user.upsert({
     where: { email: 'admin@smartqueue.com' },
-    update: {},
+    update: { password: commonPassword },
     create: {
       email: 'admin@smartqueue.com',
-      password: hashedPassword,
+      password: commonPassword,
       name: 'Super Admin Tổng',
       phone: '0848489039',
       role: Role.SUPERADMIN,
     },
   });
-  console.log('Đã tạo SuperAdmin:', superAdmin.email);
+  console.log('Đã tạo SuperAdmin: admin@smartqueue.com / hackathon123');
 
-  // 2. Tạo một Enterprise (ví dụ Highlands Coffee)
-  const highlandsUser = await prisma.user.upsert({
-    where: { email: 'contact@highlandscoffee.com.vn' },
-    update: {},
+  // 2. Tạo một User (Khách hàng)
+  const regularUser = await prisma.user.upsert({
+    where: { email: 'user@gmail.com' },
+    update: { password: commonPassword },
     create: {
-      email: 'contact@highlandscoffee.com.vn',
-      password: hashedPassword,
-      name: 'Highlands Coffee HQ',
+      email: 'user@gmail.com',
+      password: commonPassword,
+      name: 'Nguyễn Văn Khách',
+      phone: '0909123456',
+      role: Role.USER,
+    },
+  });
+  console.log('Đã tạo User: user@gmail.com / hackathon123');
+
+  // 3. Tạo một Enterprise (Doanh nghiệp - Highlands Coffee)
+  const highlandsUser = await prisma.user.upsert({
+    where: { email: 'highlands@enterprise.com' },
+    update: { password: commonPassword },
+    create: {
+      email: 'highlands@enterprise.com',
+      password: commonPassword,
+      name: 'Highlands Coffee Admin',
       phone: '19001755',
       role: Role.ENTERPRISE,
     },
@@ -43,9 +58,12 @@ async function main() {
       userId: highlandsUser.id,
     },
   });
-  console.log('Đã tạo Enterprise:', highlandsEnt.name);
+  console.log('Đã tạo Enterprise: highlands@enterprise.com / hackathon123');
 
-  // 3. Tạo các Branch cho Highlands (Địa chỉ thật tại HCM)
+  // 4. Tạo các Branch cho Highlands (Địa chỉ thật tại HCM)
+  // Xóa branch cũ để tránh lỗi duplicate khi chạy lại seed
+  await prisma.branch.deleteMany({ where: { enterpriseId: highlandsEnt.id } });
+
   const branches = [
     {
       name: 'Highlands Coffee Landmark 81',
@@ -86,19 +104,19 @@ async function main() {
       data: {
         ...b,
         enterpriseId: highlandsEnt.id,
-        currentLoad: Math.floor(Math.random() * b.maxCapacity), // Random load ban đầu cho demo
+        currentLoad: Math.floor(Math.random() * b.maxCapacity),
       },
     });
   }
   console.log(`Đã tạo ${branches.length} chi nhánh cho Highlands Coffee.`);
 
-  // 4. Tạo thêm một Enterprise khác (ví dụ Phê La)
+  // 5. Tạo thêm Phê La Enterprise
   const pheLaUser = await prisma.user.upsert({
-    where: { email: 'hello@phela.vn' },
-    update: {},
+    where: { email: 'phela@enterprise.com' },
+    update: { password: commonPassword },
     create: {
-      email: 'hello@phela.vn',
-      password: hashedPassword,
+      email: 'phela@enterprise.com',
+      password: commonPassword,
       name: 'Phê La Admin',
       phone: '19003013',
       role: Role.ENTERPRISE,
@@ -113,6 +131,8 @@ async function main() {
       userId: pheLaUser.id,
     },
   });
+
+  await prisma.branch.deleteMany({ where: { enterpriseId: pheLaEnt.id } });
 
   const pheLaBranches = [
     {
@@ -144,7 +164,13 @@ async function main() {
   }
   console.log(`Đã tạo ${pheLaBranches.length} chi nhánh cho Phê La.`);
 
-  console.log('Seed dữ liệu hoàn tất! Chúc bạn "vibe" frontend rực rỡ.');
+  console.log('\nSeed dữ liệu hoàn tất! Thông tin tài khoản test:');
+  console.log('--------------------------------------------------');
+  console.log('1. SuperAdmin: admin@smartqueue.com / hackathon123');
+  console.log('2. User:       user@gmail.com / hackathon123');
+  console.log('3. Enterprise: highlands@enterprise.com / hackathon123');
+  console.log('4. Enterprise: phela@enterprise.com / hackathon123');
+  console.log('--------------------------------------------------');
 }
 
 main()
