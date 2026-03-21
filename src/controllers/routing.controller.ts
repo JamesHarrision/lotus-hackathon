@@ -91,4 +91,19 @@ export class RoutingController {
       });
     }
   };
+
+  getAll = async (req: Request, res: Response) => {
+    try {
+      const history = await this.routingService.getAllRoutingHistory();
+      res.status(200).json({
+        success: true,
+        data: history
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  };
 }

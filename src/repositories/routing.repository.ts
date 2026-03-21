@@ -28,6 +28,17 @@ export class RoutingRepository {
     });
   }
 
+  async findAll(): Promise<RoutingHistory[]> {
+    return prisma.routingHistory.findMany({
+      include: {
+        user: { select: { name: true, email: true } },
+        fromBranch: { select: { name: true } },
+        toBranch: { select: { name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async findAllByUserId(userId: number): Promise<RoutingHistory[]> {
     return prisma.routingHistory.findMany({
       where: { userId },

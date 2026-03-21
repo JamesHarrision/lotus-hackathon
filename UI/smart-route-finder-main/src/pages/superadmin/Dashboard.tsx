@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { apiClient } from "../../lib/axios";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Building2, Users, Activity, Settings2, Globe, Server } from "lucide-react";
+import { Building2, Users, Activity, Settings2, Globe, Server, Zap } from "lucide-react";
 import { 
   LineChart, 
   Line, 
@@ -12,7 +12,9 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  AreaChart,
+  Area
 } from "recharts";
 
 const systemData = [
@@ -136,28 +138,30 @@ const SuperAdminDashboard = () => {
       )}
 
       {/* Visual Analytics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         <Card className="rounded-3xl border-zinc-200/50 shadow-xl bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-xl font-bold">System Traffic Trend</CardTitle>
-            <CardDescription>24-hour heat map of active sessions across the network</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-xl font-bold">System Efficiency Trend</CardTitle>
+              <CardDescription>Average algorithmic cost across all routing events (Lower = Better)</CardDescription>
+            </div>
+            <Zap className="h-6 w-6 text-amber-500 animate-pulse" />
           </CardHeader>
           <CardContent className="h-[300px] p-6">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={systemData}>
+              <AreaChart data={systemData}>
+                <defs>
+                   <linearGradient id="colorCost" x1="0" y1="0" x2="0" y2="1">
+                     <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
+                     <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                   </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#888'}} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#888'}} />
                 <YAxis hide />
-                <Tooltip contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
-                <Line 
-                  type="monotone" 
-                  dataKey="active" 
-                  stroke="#8b5cf6" 
-                  strokeWidth={4} 
-                  dot={{ r: 4, fill: '#8b5cf6', strokeWidth: 2, stroke: '#fff' }}
-                  activeDot={{ r: 8, strokeWidth: 0 }}
-                />
-              </LineChart>
+                <Tooltip />
+                <Area type="monotone" dataKey="active" stroke="#8b5cf6" fillOpacity={1} fill="url(#colorCost)" />
+              </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>

@@ -21,11 +21,73 @@ import Branches from "./pages/admin/Branches";
 import Analytics from "./pages/admin/Analytics";
 import SuperAdminLayout from "./layouts/SuperAdminLayout";
 import SuperAdminDashboard from "./pages/superadmin/Dashboard";
+import SuperAdminEnterprises from "./pages/superadmin/Enterprises";
+import SuperAdminLogs from "./pages/superadmin/Logs";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import Landing from "./pages/Landing";
+import { AnimatePresence, motion } from "framer-motion";
+import { useLocation } from "react-router-dom";
 
-const App = () => {
+const AppContent = () => {
+  const location = useLocation();
   useSocketIntegration();
 
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        {/* Public Routes */}
+        <Route path="/" element={
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <Landing />
+          </motion.div>
+        } />
+        <Route path="/login" element={
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+            <Login />
+          </motion.div>
+        } />
+        <Route path="/register" element={
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+            <Register />
+          </motion.div>
+        } />
+        
+        {/* Protected Standard User Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/home" element={
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="h-full">
+              <Home />
+            </motion.div>
+          } />
+          <Route path="/enterprise/:id" element={<EnterpriseDetails />} />
+        </Route>
+        
+        {/* Protected Enterprise Admin Routes */}
+        <Route element={<ProtectedRoute requiredRole="ENTERPRISE" />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="branches" element={<Branches />} />
+            <Route path="analytics" element={<Analytics />} />
+          </Route>
+        </Route>
+
+        {/* Protected Super Admin Routes */}
+        <Route element={<ProtectedRoute requiredRole="SUPERADMIN" />}>
+          <Route path="/superadmin" element={<SuperAdminLayout />}>
+            <Route index element={<SuperAdminDashboard />} />
+            <Route path="enterprises" element={<SuperAdminEnterprises />} />
+            <Route path="logs" element={<SuperAdminLogs />} />
+          </Route>
+        </Route>
+
+        {/* Catch-all */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AnimatePresence>
+  );
+};
+
+const App = () => {
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
@@ -33,37 +95,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              
-              {/* Protected Standard User Routes */}
-              <Route element={<ProtectedRoute />}>
-                <Route path="/home" element={<Home />} />
-                <Route path="/enterprise/:id" element={<EnterpriseDetails />} />
-              </Route>
-              
-              {/* Protected Enterprise Admin Routes */}
-              <Route element={<ProtectedRoute requiredRole="ENTERPRISE" />}>
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<AdminDashboard />} />
-                  <Route path="branches" element={<Branches />} />
-                  <Route path="analytics" element={<Analytics />} />
-                </Route>
-              </Route>
-
-              {/* Protected Super Admin Routes */}
-              <Route element={<ProtectedRoute requiredRole="SUPERADMIN" />}>
-                <Route path="/superadmin" element={<SuperAdminLayout />}>
-                  <Route index element={<SuperAdminDashboard />} />
-                </Route>
-              </Route>
-
-              {/* Catch-all */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <AppContent />
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>

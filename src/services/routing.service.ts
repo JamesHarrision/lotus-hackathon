@@ -80,4 +80,8 @@ export class RoutingService {
   async getUserRoutingHistory(userId: number) {
     return this.routingRepository.findAllByUserId(userId);
   }
+
+  async getAllRoutingHistory() {
+    return this.routingRepository.findAll();
+  }
 }

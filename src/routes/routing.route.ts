@@ -71,4 +71,17 @@ router.post("/recommend", routingController.recommend);
  */
 router.get("/user/:userId", routingController.getUserHistory);
 
+/**
+ * @swagger
+ * /api/routings:
+ *   get:
+ *     summary: Get all routing history (Super Admin only)
+ *     tags: [Routing]
+ *     responses:
+ *       200:
+ *         description: List of all routing events
+ */
+import { authMiddleware, roleMiddleware } from "../middlewares/auth.middleware";
+router.get("/", authMiddleware, roleMiddleware(['SUPERADMIN']), routingController.getAll);
+
 export default router;

@@ -1,7 +1,7 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import { useAppStore } from "../store/useAppStore";
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard, Building2, Users } from "lucide-react";
+import { LogOut, LayoutDashboard, Building2, ScrollText, Users } from "lucide-react";
 
 const SuperAdminLayout = () => {
   const { user, logout } = useAppStore();
@@ -29,11 +29,11 @@ const SuperAdminLayout = () => {
           </Button>
           <Button variant="ghost" className="w-full justify-start text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 font-medium transition-colors" onClick={() => navigate("/superadmin/enterprises")}>
             <Building2 className="mr-2 h-4 w-4" />
-            All Enterprises
+            Enterprises
           </Button>
-          <Button variant="ghost" className="w-full justify-start text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 font-medium transition-colors" onClick={() => navigate("/superadmin/users")}>
-            <Users className="mr-2 h-4 w-4" />
-            Users & Roles
+          <Button variant="ghost" className="w-full justify-start text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50 font-medium transition-colors" onClick={() => navigate("/superadmin/logs")}>
+            <ScrollText className="mr-2 h-4 w-4" />
+            System Logs
           </Button>
         </nav>
 
@@ -58,7 +58,7 @@ const SuperAdminLayout = () => {
             <div className="flex gap-2 overflow-x-auto pb-2 noscrollbar">
               <Button variant="outline" size="sm" onClick={() => navigate("/superadmin")} className="whitespace-nowrap rounded-full border-purple-200 text-purple-700">Control Center</Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/superadmin/enterprises")} className="whitespace-nowrap rounded-full border-zinc-200">Enterprises</Button>
-              <Button variant="outline" size="sm" onClick={() => navigate("/superadmin/users")} className="whitespace-nowrap rounded-full border-zinc-200">Users</Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("/superadmin/logs")} className="whitespace-nowrap rounded-full border-zinc-200">System Logs</Button>
             </div>
         </div>
         <div className="p-4 md:p-8">

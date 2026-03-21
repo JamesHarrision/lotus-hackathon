@@ -15,6 +15,8 @@ import {
   Area
 } from "recharts";
 import { BrainCircuit, TrendingUp, Award, Zap } from "lucide-react";
+import { motion } from "framer-motion";
+import { MetricSkeleton, CardSkeleton } from "@/components/SkeletonLoader";
 
 // Mock Data for demonstration
 const redirectData = [
@@ -40,124 +42,148 @@ const Analytics = () => {
 
   useEffect(() => {
     // Simulate loading
-    const timer = setTimeout(() => setLoading(false), 800);
+    const timer = setTimeout(() => setLoading(false), 1200);
     return () => clearTimeout(timer);
   }, []);
 
-  if (loading) {
-    return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-10 w-64 bg-zinc-200 dark:bg-zinc-800 rounded"></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-           <div className="h-80 bg-zinc-200 dark:bg-zinc-800 rounded-2xl"></div>
-           <div className="h-80 bg-zinc-200 dark:bg-zinc-800 rounded-2xl"></div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans">
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      className="space-y-8 font-sans"
+    >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-4xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-tight">
             AI Analytics & Insights
           </h1>
-          <p className="text-zinc-500 font-medium mt-1">Measuring routing optimization and system impact.</p>
+          <p className="text-zinc-500 font-medium mt-1 uppercase text-[10px] tracking-[0.2em]">Measuring routing optimization and system impact.</p>
         </div>
-        <div className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 rounded-full flex items-center gap-2 text-blue-600 font-bold text-sm">
-           <Zap className="w-4 h-4 fill-blue-600" /> Smart Monitoring Active
-        </div>
+        <motion.div 
+           initial={{ x: 20, opacity: 0 }}
+           animate={{ x: 0, opacity: 1 }}
+           className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-full flex items-center gap-2 text-blue-600 dark:text-blue-400 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-500/10"
+        >
+           <Zap className="w-4 h-4 fill-blue-600 dark:fill-blue-400 animate-pulse" /> Neural Monitoring Active
+        </motion.div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border-zinc-200/50 shadow-sm hover:shadow-lg transition-all border-l-4 border-l-blue-500">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs font-bold uppercase tracking-widest text-zinc-400">Total Redirects</CardDescription>
-            <CardTitle className="text-3xl font-black">1,402</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-1 text-emerald-500 font-bold text-sm">
-                <TrendingUp className="w-4 h-4" /> +12% from last week
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border-zinc-200/50 shadow-sm hover:shadow-lg transition-all border-l-4 border-l-indigo-500">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs font-bold uppercase tracking-widest text-zinc-400">Algorithm Accuracy</CardDescription>
-            <CardTitle className="text-3xl font-black">94.2%</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-1 text-blue-500 font-bold text-sm">
-                <BrainCircuit className="w-4 h-4" /> High confidence rating
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border-zinc-200/50 shadow-sm hover:shadow-lg transition-all border-l-4 border-l-amber-500">
-          <CardHeader className="pb-2">
-            <CardDescription className="text-xs font-bold uppercase tracking-widest text-zinc-400">Total Incentives</CardDescription>
-            <CardTitle className="text-3xl font-black">485</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-1 text-amber-500 font-bold text-sm">
-                <Award className="w-4 h-4" /> Issued today
-            </div>
-          </CardContent>
-        </Card>
+        {loading ? (
+          Array.from({ length: 3 }).map((_, i) => <MetricSkeleton key={i} />)
+        ) : (
+          <>
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
+              <Card className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border-zinc-200/50 dark:border-zinc-800/50 shadow-sm hover:shadow-2xl transition-all border-l-4 border-l-blue-500 rounded-[2rem] overflow-hidden">
+                <CardHeader className="pb-2">
+                  <CardDescription className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Total Redirects</CardDescription>
+                  <CardTitle className="text-4xl font-black tracking-tighter">1,402</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-1 text-emerald-500 font-black text-[10px] uppercase tracking-widest">
+                      <TrendingUp className="w-4 h-4" /> +12% Efficiency
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
+              <Card className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border-zinc-200/50 dark:border-zinc-800/50 shadow-sm hover:shadow-2xl transition-all border-l-4 border-l-indigo-500 rounded-[2rem] overflow-hidden">
+                <CardHeader className="pb-2">
+                  <CardDescription className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Neural Accuracy</CardDescription>
+                  <CardTitle className="text-4xl font-black tracking-tighter">94.2%</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-1 text-indigo-500 font-black text-[10px] uppercase tracking-widest">
+                      <BrainCircuit className="w-4 h-4" /> High Confidence
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
+              <Card className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl border-zinc-200/50 dark:border-zinc-800/50 shadow-sm hover:shadow-2xl transition-all border-l-4 border-l-amber-500 rounded-[2rem] overflow-hidden">
+                <CardHeader className="pb-2">
+                  <CardDescription className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Total Rewards</CardDescription>
+                  <CardTitle className="text-4xl font-black tracking-tighter">485</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-1 text-amber-500 font-black text-[10px] uppercase tracking-widest">
+                      <Award className="w-4 h-4" /> Issued Today
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        {/* Line Chart: Redirects Over Time */}
-        <Card className="rounded-2xl border-zinc-200/50 shadow-xl overflow-hidden bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl">
-          <CardHeader className="bg-zinc-50/50 dark:bg-zinc-800/30 border-b border-zinc-100 dark:border-zinc-800">
-            <CardTitle className="text-xl font-bold">Traffic Redistribution</CardTitle>
-            <CardDescription>Daily redirected customers via AI recommendations</CardDescription>
-          </CardHeader>
-          <CardContent className="p-6 h-[350px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={redirectData}>
-                <defs>
-                  <linearGradient id="colorRedirected" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 12}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 12}} />
-                <Tooltip 
-                  contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'}} 
-                />
-                <Area type="monotone" dataKey="redirected" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorRedirected)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        {loading ? (
+          <>
+            <CardSkeleton />
+            <CardSkeleton />
+          </>
+        ) : (
+          <>
+            {/* Line Chart: Redirects Over Time */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+              <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-white/50 dark:bg-zinc-900/50 backdrop-blur-3xl border border-zinc-200/50 dark:border-zinc-800/50">
+                <CardHeader className="bg-zinc-50/50 dark:bg-zinc-800/30 border-b border-zinc-100 dark:border-zinc-800 px-8 py-6">
+                  <CardTitle className="text-xl font-black tracking-tight">Traffic Redistribution</CardTitle>
+                  <CardDescription className="text-[10px] font-bold uppercase tracking-widest opacity-60">Daily redirected customers via AI recommendations</CardDescription>
+                </CardHeader>
+                <CardContent className="p-8 h-[400px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={redirectData}>
+                      <defs>
+                        <linearGradient id="colorRedirected" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.05} />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 10, fontWeight: 700}} />
+                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 10, fontWeight: 700}} />
+                      <Tooltip 
+                        contentStyle={{borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)', backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)'}} 
+                        itemStyle={{fontWeight: 900, fontSize: '12px'}}
+                      />
+                      <Area type="monotone" dataKey="redirected" stroke="#3b82f6" strokeWidth={4} fillOpacity={1} fill="url(#colorRedirected)" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-        {/* Bar Chart: Incentive Redemptions */}
-        <Card className="rounded-2xl border-zinc-200/50 shadow-xl overflow-hidden bg-white/50 dark:bg-zinc-900/50 backdrop-blur-xl">
-          <CardHeader className="bg-zinc-50/50 dark:bg-zinc-800/30 border-b border-zinc-100 dark:border-zinc-800">
-            <CardTitle className="text-xl font-bold">Incentive Performance</CardTitle>
-            <CardDescription>Coupons issued vs successfully redeemed by branch</CardDescription>
-          </CardHeader>
-          <CardContent className="p-6 h-[350px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={incentiveData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 12}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 12}} />
-                <Tooltip 
-                  contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)'}}
-                />
-                <Legend verticalAlign="top" align="right" height={36}/>
-                <Bar dataKey="issued" fill="#6366f1" radius={[6, 6, 0, 0]} barSize={24} />
-                <Bar dataKey="redeemed" fill="#10b981" radius={[6, 6, 0, 0]} barSize={24} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+            {/* Bar Chart: Incentive Redemptions */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+              <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-white/50 dark:bg-zinc-900/50 backdrop-blur-3xl border border-zinc-200/50 dark:border-zinc-800/50">
+                <CardHeader className="bg-zinc-50/50 dark:bg-zinc-800/30 border-b border-zinc-100 dark:border-zinc-800 px-8 py-6">
+                  <CardTitle className="text-xl font-black tracking-tight">Incentive Performance</CardTitle>
+                  <CardDescription className="text-[10px] font-bold uppercase tracking-widest opacity-60">Coupons issued vs successfully redeemed by branch</CardDescription>
+                </CardHeader>
+                <CardContent className="p-8 h-[400px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={incentiveData}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.05} />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 10, fontWeight: 700}} />
+                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#888', fontSize: 10, fontWeight: 700}} />
+                      <Tooltip 
+                        contentStyle={{borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)', backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)'}}
+                        itemStyle={{fontWeight: 900, fontSize: '12px'}}
+                      />
+                      <Legend verticalAlign="top" align="right" height={36} wrapperStyle={{fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em'}}/>
+                      <Bar dataKey="issued" fill="#6366f1" radius={[10, 10, 0, 0]} barSize={20} />
+                      <Bar dataKey="redeemed" fill="#10b981" radius={[10, 10, 0, 0]} barSize={20} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </>
+        )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
