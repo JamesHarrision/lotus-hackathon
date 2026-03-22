@@ -82,32 +82,32 @@ export const AIChatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
           initial={{ opacity: 0, y: 100, scale: 0.9, rotate: 5 }}
           animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }}
           exit={{ opacity: 0, y: 100, scale: 0.9, rotate: 5 }}
-          className="fixed bottom-8 right-8 w-[500px] h-[700px] bg-zinc-900/95 backdrop-blur-3xl border border-white/10 rounded-[3rem] shadow-[0_0_80px_-20px_rgba(79,70,229,0.4)] z-[100] flex flex-col overflow-hidden"
+          className="fixed bottom-4 right-4 w-[340px] h-[480px] bg-zinc-900/95 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_0_40px_-10px_rgba(79,70,229,0.25)] z-[100] flex flex-col overflow-hidden"
         >
           {/* Header */}
-          <div className="p-8 bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-700 flex items-center justify-between shadow-2xl relative">
+          <div className="p-4 bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-700 flex items-center justify-between shadow-2xl relative">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none" />
-            <div className="flex items-center gap-4 relative z-10">
-              <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-md shadow-inner border border-white/20">
-                <Brain className="w-8 h-8 text-white animate-pulse" />
+            <div className="flex items-center gap-2 relative z-10">
+              <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-md shadow-inner border border-white/20">
+                <Brain className="w-5 h-5 text-white animate-pulse" />
               </div>
               <div>
-                <h3 className="font-black text-white tracking-[0.3em] uppercase text-[11px]">YOGO Neural Interface</h3>
-                <div className="flex items-center gap-2 mt-1">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
-                  <span className="text-[10px] text-indigo-100 font-black uppercase tracking-widest opacity-90">AI Search Active</span>
+                <h3 className="font-black text-white tracking-[0.2em] uppercase text-[9px]">YOGO Neural Interface</h3>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" />
+                  <span className="text-[8px] text-indigo-100 font-black uppercase tracking-widest opacity-90">AI Search Active</span>
                 </div>
               </div>
             </div>
-            <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all active:scale-90 bg-white/5 border border-white/10">
-              <X className="w-6 h-6 text-white" />
+            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-all active:scale-90 bg-white/5 border border-white/10">
+              <X className="w-4 h-4 text-white" />
             </button>
           </div>
 
           {/* Messages Area */}
           <div 
             ref={scrollRef}
-            className="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar bg-[radial-gradient(circle_at_50%_0%,_var(--tw-gradient-stops))] from-indigo-500/10 via-transparent to-transparent"
+            className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar bg-[radial-gradient(circle_at_50%_0%,_var(--tw-gradient-stops))] from-indigo-500/10 via-transparent to-transparent"
           >
             {messages.map((msg, i) => (
               <motion.div
@@ -116,10 +116,10 @@ export const AIChatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                 key={i}
                 className={`flex flex-col ${msg.role === 'ai' ? 'items-start' : 'items-end'}`}
               >
-                <div className={`max-w-[95%] p-6 rounded-[2rem] text-[15px] font-medium leading-relaxed shadow-lg ${
+                <div className={`max-w-[95%] p-3 rounded-xl text-[13px] font-medium leading-relaxed shadow ${
                   msg.role === 'ai' 
                     ? 'bg-zinc-800/90 text-zinc-100 border border-white/5 rounded-tl-none' 
-                    : 'bg-indigo-600 text-white rounded-tr-none shadow-xl shadow-indigo-600/30'
+                    : 'bg-indigo-600 text-white rounded-tr-none shadow-indigo-600/30'
                 }`}>
                   {msg.content}
                 </div>
@@ -128,44 +128,44 @@ export const AIChatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                   <motion.div 
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="mt-6 p-8 bg-indigo-500/5 border border-indigo-500/20 rounded-[2.5rem] relative overflow-hidden group"
+                    className="mt-3 p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl relative overflow-hidden group"
                   >
                     <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500" />
-                    <Quote className="absolute top-4 right-4 w-12 h-12 text-indigo-500/10" />
-                    <h5 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-                       <Sparkles className="w-4 h-4" /> Neural Synthesis
+                    <Quote className="absolute top-2 right-2 w-7 h-7 text-indigo-500/10" />
+                    <h5 className="text-[8px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-1">
+                       <Sparkles className="w-3 h-3" /> Neural Synthesis
                     </h5>
-                    <p className="text-sm text-zinc-300 leading-relaxed font-medium italic">
+                    <p className="text-xs text-zinc-300 leading-relaxed font-medium italic">
                        {msg.synthesis}
                     </p>
                   </motion.div>
                 )}
                 
                 {msg.results && (
-                  <div className="mt-8 space-y-4 w-full">
-                    <h6 className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.4em] ml-2">Source Nodes</h6>
+                  <div className="mt-4 space-y-2 w-full">
+                    <h6 className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] ml-1">Source Nodes</h6>
                     {msg.results.map((res, ri) => (
                       <motion.div 
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: ri * 0.1 }}
                         key={ri}
-                        className="p-6 bg-zinc-950/40 border border-white/5 rounded-[1.5rem] hover:border-indigo-500/30 transition-all group relative overflow-hidden"
+                        className="p-3 bg-zinc-950/40 border border-white/5 rounded-xl hover:border-indigo-500/30 transition-all group relative overflow-hidden"
                       >
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3">
-                             <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                                <Globe className="w-4 h-4 text-indigo-400" />
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                             <div className="w-5 h-5 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+                                <Globe className="w-3 h-3 text-indigo-400" />
                              </div>
-                             <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest truncate max-w-[200px]">
+                             <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest truncate max-w-[120px]">
                                {new URL(res.url).hostname}
                              </span>
                           </div>
-                          <a href={res.url} target="_blank" rel="noopener noreferrer" className="p-2 hover:bg-white/5 rounded-lg transition-colors">
-                             <ExternalLink className="w-4 h-4 text-zinc-500 group-hover:text-indigo-400" />
+                          <a href={res.url} target="_blank" rel="noopener noreferrer" className="p-1 hover:bg-white/5 rounded-lg transition-colors">
+                             <ExternalLink className="w-3 h-3 text-zinc-500 group-hover:text-indigo-400" />
                           </a>
                         </div>
-                        <h4 className="text-sm font-black text-zinc-100 mb-3 tracking-tight group-hover:text-indigo-400 transition-colors uppercase">{res.title}</h4>
+                        <h4 className="text-xs font-black text-zinc-100 mb-1 tracking-tight group-hover:text-indigo-400 transition-colors uppercase">{res.title}</h4>
                       </motion.div>
                     ))}
                   </div>
@@ -174,21 +174,21 @@ export const AIChatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
             ))}
             
             {(isTyping || isSearching) && (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
                 <div className="flex justify-start">
-                  <div className="bg-zinc-800/50 p-5 rounded-[1.5rem] rounded-tl-none border border-white/5 flex gap-2 items-center">
-                    <motion.div animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.2 }} className="w-2.5 h-2.5 bg-indigo-500 rounded-full" />
-                    <motion.div animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.2 }} className="w-2.5 h-2.5 bg-violet-500 rounded-full" />
-                    <motion.div animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.4 }} className="w-2.5 h-2.5 bg-blue-500 rounded-full" />
+                  <div className="bg-zinc-800/50 p-2 rounded-xl rounded-tl-none border border-white/5 flex gap-1 items-center">
+                    <motion.div animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.2 }} className="w-1.5 h-1.5 bg-indigo-500 rounded-full" />
+                    <motion.div animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.2 }} className="w-1.5 h-1.5 bg-violet-500 rounded-full" />
+                    <motion.div animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.2, delay: 0.4 }} className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
                   </div>
                 </div>
                 {isSearching && (
                   <motion.div 
                     initial={{ opacity: 0 }} 
                     animate={{ opacity: 1 }} 
-                    className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] ml-2 flex items-center gap-3"
+                    className="text-[8px] font-black text-indigo-400 uppercase tracking-[0.2em] ml-1 flex items-center gap-2"
                   >
-                    <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                    <div className="w-3 h-3 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
                     Neural Synthesis in Progress...
                   </motion.div>
                 )}
@@ -197,7 +197,7 @@ export const AIChatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
           </div>
 
           {/* Input Area */}
-          <div className="p-10 bg-zinc-950/80 border-t border-white/5 backdrop-blur-2xl">
+          <div className="p-4 bg-zinc-950/80 border-t border-white/5 backdrop-blur-2xl">
             <div className="relative group">
               <input
                 type="text"
@@ -205,20 +205,20 @@ export const AIChatbot = ({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                className="w-full h-18 bg-zinc-900 border border-zinc-800 rounded-[2rem] px-8 pr-20 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-bold text-base text-white placeholder:text-zinc-600 uppercase tracking-tight"
+                className="w-full h-10 bg-zinc-900 border border-zinc-800 rounded-xl px-4 pr-12 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-bold text-sm text-white placeholder:text-zinc-600 tracking-tight"
               />
               <motion.button 
-                whileHover={{ scale: 1.05, x: -5 }}
+                whileHover={{ scale: 1.05, x: -3 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleSend}
                 disabled={isTyping || isSearching}
-                className="absolute right-4 top-4 h-10 w-12 bg-indigo-600 rounded-[1.2rem] flex items-center justify-center hover:bg-indigo-500 transition-colors shadow-2xl shadow-indigo-600/40 disabled:opacity-50"
+                className="absolute right-2 top-1.5 h-7 w-8 bg-indigo-600 rounded-lg flex items-center justify-center hover:bg-indigo-500 transition-colors shadow-indigo-600/40 disabled:opacity-50"
               >
-                <Send className="w-5 h-5 text-white" />
+                <Send className="w-4 h-4 text-white" />
               </motion.button>
             </div>
-            <div className="mt-8 flex items-center gap-3 text-[10px] text-zinc-600 font-black uppercase tracking-[0.4em] justify-center opacity-40">
-              <Sparkles className="w-3.5 h-3.5" /> Intelligence via Exa Neural Core
+            <div className="mt-3 flex items-center gap-2 text-[8px] text-zinc-600 font-black uppercase tracking-[0.3em] justify-center opacity-40">
+              <Sparkles className="w-3 h-3" /> Intelligence via Exa Neural Core
             </div>
           </div>
         </motion.div>

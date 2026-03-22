@@ -122,9 +122,9 @@ const Landing = () => {
             AI Algorithm v2.4 Live
           </motion.div>
           <motion.h1 variants={itemVariants} className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9]">
-            The Future of <br />
-            <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-blue-400 bg-clip-text text-transparent">
-              Smart Redistribution
+            You Only Go <br />
+            <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-blue-400 bg-clip-text text-transparent px-1">
+              Once
             </span>
           </motion.h1>
           <motion.p variants={itemVariants} className="text-lg md:text-xl text-zinc-400 max-w-xl font-medium leading-relaxed">
@@ -389,10 +389,10 @@ const Landing = () => {
       <section className="bg-zinc-50 dark:bg-zinc-900/30 border-y border-zinc-200 dark:border-white/5 py-24 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 text-center group">
           {[
-            { label: "Active Nodes", value: "850+" },
-            { label: "Daily Routings", value: "125k" },
-            { label: "Wait Reduction", value: "42%" },
-            { label: "Network Uptime", value: "99.9%" }
+            { label: "Active Nodes", value: "NAN" },
+            { label: "Daily Routings", value: "NAN" },
+            { label: "Wait Reduction", value: "NAN" },
+            { label: "Network Uptime", value: "NAN" }
           ].map((s, i) => (
             <div key={i} className="space-y-2">
               <div className="text-4xl md:text-5xl font-black tracking-tighter bg-gradient-to-b from-white to-zinc-500 bg-clip-text text-transparent group-hover:to-indigo-400 transition-all duration-1000">
